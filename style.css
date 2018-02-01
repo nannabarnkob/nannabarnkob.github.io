@@ -1,0 +1,12 @@
+
+.pumpkin {
+  fill: yellow;
+  stroke: orange;
+  stroke-width: 5;
+}
+
+p {
+	font-family: 'Open Sans Condensed', tahoma, sans-serif;
+	font-size: 14px;
+	color: #000FFF;
+}
