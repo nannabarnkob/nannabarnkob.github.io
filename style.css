@@ -8,5 +8,11 @@
 p {
 	font-family: 'Open Sans Condensed', tahoma, sans-serif;
 	font-size: 14px;
-	color: #000FFF;
+	color: #0000FF;
+}
+
+b {
+  font-family: tahoma;
+  font-size: 20px;
+  color: #000000;
 }
