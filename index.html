@@ -1,5 +1,9 @@
-<html>
+
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="d3.js"></script>
     <title> Social data analysis and visualization </title>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="style.css">
@@ -8,23 +12,59 @@
         document.getElementById("demo").innerHTML = "Paragraph changed.";
       }
     </script>
+    <style type="text/css">
+
+  div.bar {
+    display: inline-block;
+    width: 20px;
+    height: 75px;	/* Gets overridden by D3-assigned height below */
+    margin-right: 2px;
+    background-color: teal;
+  }
+
+</style>
   </head>
 
   <body>
+
+    <script type="text/javascript">
+
+    var dataset = [ 5, 10, 15, 20, 25 ];
+
+    d3.select("body").selectAll("p")
+      .data(dataset)
+      .enter()
+      .append("p")
+      .text("New paragraph!");
+
+    </script>
     <h1>A Web Page</h1>
     <p id="demo">A Paragraph</p>
     <button type="button" onclick="myFunction()">Try it</button>
     <svg width="10" height="100">
     <circle cx="25" cy="25" r="22" class="pumpkin"/>
     </svg>
-    <script type="text/javascript" src="new.js">
-      var numbers = [8,100,22,98,99,45]
-      printNumbers(numbers)
-      alert("Hello world")
-      document.write("hello");
+    <a href="project-folder/project_file1.html">Click here for another page </a> <br>
+    <a href="server.html">Click here for the server  page </a>
+    <a href="F02/03_csv_loading_example.html">Click here for loading data </a>
+    <script type="text/javascript">
+      var dataset = [];  						 //Initialize empty array
+      var dataset_double = [];
+      for (var i = 0; i < 25; i++) {			 //Loop 25 times
+      var newNumber = Math.floor(Math.random() * 30);  //New random integer (0-29)
+      dataset.push(newNumber);			 // Add new number to array
+      var newNumber = Math.
+      }
+      d3.select("body").selectAll("div")
+      .data(dataset)
+      .enter()
+      .append("div")
+      .attr("class", "bar")
+      .style("height", function(d) {
+      var barHeight = d * 5;
+      return barHeight + "px";
+      });
+
     </script>
-    <a href="project-folder/project_file1.html">Click here for another page </a> 
-    <a href="server.html">Click here for the server  page </a> 
-    <a href="dynamictest.php">Click here for testing php compatiblity</a> 
   </body>
 </html>
