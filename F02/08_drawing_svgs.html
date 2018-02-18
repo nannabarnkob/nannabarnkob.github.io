@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: Creating an empty SVG</title>
+		<script type="text/javascript" src="../d3.js"></script>
+		<style type="text/css">
+			/* No style rules here yet */
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+
+			//Create SVG element
+			// By defining svg as a variable, we can use svg.method() on it later,
+			// because we are creating a reference to the svg element
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", 500)
+						.attr("height", 50);
+
+		</script>
+	</body>
+</html>
