@@ -16,3 +16,9 @@ b {
   font-size: 20px;
   color: #000000;
 }
+
+ul {
+  font-family: 'Open Sans Condensed', tahoma, sans-serif;
+	font-size: 14px;
+	color: #000000;
+}

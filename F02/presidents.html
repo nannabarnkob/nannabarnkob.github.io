@@ -7,9 +7,10 @@
 	</head>
 	<body>
 		<script type="text/javascript">
-			var dataset = d3.csv("president_counts.csv", function(data) {
-				console.log(data);
-			});
+			var dataset; // declare global variable
+			d3.csv("president_counts.csv", function(data) {
+				dataset = data;
+
 			//Width and height
 			var w = 500;
 			var h = 100;
@@ -30,7 +31,7 @@
 			   		return d[1];
 			   })
 			   .attr("r", 5);
-
+			});
 		</script>
 	</body>
 </html>
