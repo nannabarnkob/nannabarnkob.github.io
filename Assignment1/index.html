@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<title>Assignment 1: Social Data Analysis and Visualization</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="d3.js"></script>
 	</head>
 	<body>
@@ -196,7 +196,7 @@
                     .append("svg")
                     .attr("width", w + padding)
                     .attr("height", h + padding);
-                    // Define clipping path
+              // Define clipping path
               svg.append("clipPath")
                   .attr("id", "chart-area")
                   .append("rect")
@@ -340,8 +340,8 @@
                     return "rgb(0, 0, " + Math.round(d.count * 10) + ")";
                   });
                     // Update labels
-                    svg.selectAll("text")
-                       .data(dataset)
+                  svg.selectAll("text")
+                      .data(dataset)
                        .transition()
                        .delay(function(d, i) {
                          return i / dataset.length * 1000;
