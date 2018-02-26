@@ -38,7 +38,7 @@ a:hover {
 }
 
 a.noformat  {
-    font-family: 'Open Sans Condensed', tahoma, sans-serif;
+    font-family: 'Open Sans Condensed', helvetica, tahoma, sans-serif;
     color: #E35F4B;
     padding-left: 1px;
     text-transform: none;
@@ -54,7 +54,7 @@ h2,
 h3 {
     font-weight: 300;
     margin: 0;
-    font-family: 'Open Sans Condensed', tahoma, sans-serif;
+    font-family: 'Open Sans Condensed', helvetica, tahoma, sans-serif;
 }
 h4,
 h5 {
@@ -89,7 +89,7 @@ h3.reprod:hover {
   color:#223d61;
 }
 p {
-    font-family: 'Open Sans Condensed', tahoma, sans-serif;
+    font-family: 'Open Sans Condensed', helvetica, tahoma, sans-serif;
     line-height: 1.375rem;
 		font-size: 18px;
     padding-bottom: 2px;
@@ -101,7 +101,7 @@ p.maintext {
 }
 
 p.statistic {
-  font-family: 'Open Sans Condensed', tahoma, sans-serif;
+  font-family: 'Open Sans Condensed', helvetica, tahoma, sans-serif;
   font-size: 16px;
   color: #008080;
   font-weight: bold;
@@ -110,7 +110,7 @@ p.statistic {
   text-align: center;
 }
 p.statistic:hover {
-  font-family: 'Open Sans Condensed', tahoma, sans-serif;
+  font-family: 'Open Sans Condensed', helvetica, tahoma, sans-serif;
   font-size: 16px;
   color: #008080;
   background: #d1e7e5;
@@ -123,13 +123,13 @@ a.maintext {
   text-transform: none;
 }
 li {
-    font-family: 'Open Sans Condensed', tahoma, sans-serif;
+    font-family: 'Open Sans Condensed', helvetica, tahoma, sans-serif;
     padding-top: 10px;
     padding-bottom: 5px;
     font-size: 18px;
 }
 ul {
-    font-family: 'Open Sans Condensed', tahoma, sans-serif;
+    font-family: 'Open Sans Condensed', helvetica, tahoma, sans-serif;
     font-size: 18px;
 }
 h3.reprod {
