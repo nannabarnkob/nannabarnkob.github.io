@@ -5,7 +5,7 @@
 		<title>D3: A simple scatterplot with value labels</title>
 		<script type="text/javascript" src="../d3.js"></script>
 		<style type="text/css">
-			/* No style rules here yet */		
+			/* No style rules here yet */
 		</style>
 	</head>
 	<body>
@@ -14,12 +14,12 @@
 			//Width and height
 			var w = 500;
 			var h = 100;
-			
+
 			var dataset = [
 							[5, 20], [480, 90], [250, 50], [100, 33], [330, 95],
 							[410, 12], [475, 44], [25, 67], [85, 21], [220, 88]
 						  ];
-	
+
 			//Create SVG element
 			var svg = d3.select("body")
 						.append("svg")
@@ -51,12 +51,12 @@
 			   		return d[0];
 			   })
 			   .attr("y", function(d) {
-			   		return d[1];
+			   		return 1.5*d[1];
 			   })
 			   .attr("font-family", "sans-serif")
 			   .attr("font-size", "11px")
 			   .attr("fill", "red");
-			
+
 		</script>
 	</body>
 </html>

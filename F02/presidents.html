@@ -3,34 +3,115 @@
 	<head>
 		<meta charset="utf-8">
 		<title>D3: Loading president data</title>
-		<script type="text/javascript" src="../d3.js"></script>
+		<script type="text/javascript" src="d3.js"></script>
 	</head>
 	<body>
+		<h1> Presidents </h1>
+
 		<script type="text/javascript">
+			d3.select("body").select("h2")
+				.append("h2")
+				.text("Histogram");
+
 			var dataset; // declare global variable
 			d3.csv("president_counts.csv", function(data) {
-				dataset = data;
+				data.forEach(function(d) {
+    		d.index_number = +d.index_number;
+    		d.time = +d.time;
+				});
+			console.log(data);
+			dataset = data;
 
 			//Width and height
-			var w = 500;
-			var h = 100;
+			var w = 1000;
+			var h = 200;
+			var barPadding = 1;
 
 			var svg = d3.select("body")
 						.append("svg")
 						.attr("width", w)
 						.attr("height", h);
 
-			svg.selectAll("circle")
+			svg.selectAll("rect")
+			   .data(dataset)
+			   .enter()
+			   .append("rect")
+			   .attr("x", function(d, i) {
+			   		return i * (w / dataset.length);
+			   })
+			   .attr("y", function(d) {
+			   		return h - (d.time * 8);
+			   })
+			   .attr("width", w / dataset.length - barPadding)
+			   .attr("height", function(d) {
+			   		return d.time * 8;
+			   })
+			   .attr("fill", function(d) {
+					return "rgb(0, 0, " + Math.round(d.time * 10) + ")";
+				 })
+
+			svg.selectAll("text")
+	 			 .data(dataset)
+	 			 .enter()
+	 			 .append("text")
+	 			 .text(function(d) {
+	 			 		return d.time;
+	 			 })
+	 			 .attr("text-anchor", "middle")
+	 			 .attr("x", function(d, i) {
+	 			 		return i * (w / dataset.length) + (w / dataset.length - barPadding) / 2;
+	 			 })
+	 			 .attr("y", function(d) {
+	 			 		return h - (d.time * 6) + 14;
+	 			 })
+	 			 .attr("font-family", "sans-serif")
+	 			 .attr("font-size", "11px")
+	 			 .attr("fill", "white");
+			});
+
+			</script>
+
+			<script type="text/javascript">
+			d3.select("body").selectAll("h2")
+				.append("h2")
+				.text("Office times");
+
+			var dataset; // declare global variable
+			d3.csv("presidents.csv", function(data) {
+				data.forEach(function(d) {
+				d.index_number = +d.index_number;
+				d.time = +d.time;
+				});
+			console.log(data);
+			dataset = data;
+
+
+			//Width and height
+			var w = 1000;
+			var h = 1000;
+			var barPadding = 1;
+
+
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+
+
+			svg.selectAll("dot")
 			   .data(dataset)
 			   .enter()
 			   .append("circle")
 			   .attr("cx", function(d) {
-			   		return d[0];
+			   		return d.time;
 			   })
 			   .attr("cy", function(d) {
-			   		return d[1];
+			   		return 4*d.index_number;
 			   })
-			   .attr("r", 5);
+			   .attr("r", 4)
+				 .attr("fill", "none")
+				 .attr("stroke", "black");
 			});
 		</script>
 	</body>

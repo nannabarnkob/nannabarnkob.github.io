@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Assignment 1: Social Data Analysis and Visualization</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="d3.js"></script>
+	</head>
+	<body>
+  <p>
+    <h1> Assignment 1: Social Data Analysis and Visualization </h1>
+    <center> <a href="#part1">PART 1</a> <a href="#part2">PART 2</a> <a href="#viz1">VIZ 1</a><a href="Indexmappe/index.html">VIZ 1</a> <a href="#viz2">VIZ 2</a> </center>
+      <section id="part1" class="home">
+        <div class="sections">
+          <h2> Part 1: DAOST Chapter Questions</h2>
+      		<ul>
+      			<li>  <b>Explain in your own words the point of the jitter plot.</b></li>
+            Jitter plots plot the observations on one line. If two observations has the same value it will shift each observations by a small random amount from the original position. In this way, the data points are seperated such that they are not stacked on to of each other.
+            Most importantly, the point of a jitter plot is to create a quick overview of the data.
+            By doing this, the viewer will gain a sense of the amount of data points mapping to this position, and whether they occur several times - thus we get a sense of density around the value.
+
+            <li>  <b> Explain in your own words the point of figure 2-3. (I'm going to skip saying "in your own words" going forward, but I hope you get the point; I expect all answers to be in your own words). </b></li>
+            The two histograms in figure 2-3 underline the importance of choosing data bins that represent the data as correctly as possible.
+            The difference in how the data bins are made are both in where the borders of the bins are positioned - also bin width is important to how the data is interpreted, but this is not highlighted in this figure.
+            The top panel implies a uniform distribution of the data points, where the bottom panel would imply a normal distribution.
+            Effectively, both data sets are too small to give a clear idea about distribution.
+
+      			<li> <b>The author of DAOST (Philipp Janert) likes KDEs (and think they're better than histograms). And I don't. I didn't give a detailed explanation in the video, but now that works to my advantage. I'll ask you guys to think about this and thereby create an excellent exercise: When can KDEs be misleading? (I'll provide the answer in a later lecture :)</b></li>
+            Just like histograms, KDEs can be misleading because the trends that are shown in the data are dependent on bandwidth chosen. This is mentioned in the text as the <i>bias-variance trade-off</i>.
+            Looking at figure 2-4 in the chapter, it is seen how the bandwidth can affect how extreme an observation seems and may be interpreted by the viewer. At the peaks, the histogram counts reach 14. With the bandwith curve of 2.5, the peak only reaches a little higher than 2 counts, which is about 15% of the true density at this point. The more narrow bandwidth of 0.8 only reaches a little below half of the true density.
+            It seems that the KDE is effectively more like a trade-off between retaining the integrity of the data set and a smooth, nice looking curve. This turns out in favour of looks instead of presenting the data truthfully. Finally, much people interpreting a KDE plot may not know to what extend the curve is smoothened because bandwidth is an abstract and complex parameter, especially compared to the more simple measure of how bin size affects a histogram.
+
+      			<li> <b> I've discussed some strengths of the CDF - there are also weaknesses. Janert writes "[CDFs] have less intuitive appeal than histograms of KDEs". What does he mean by that?</b></li>
+            It is possible that he may refer to the fact that some viwers may be confused about the frequency of observations in the tail. For instance, if looking at figure 2-7 of server response times, the observations seen from 2000 to 3000 may seem to be relatively frequent and add significantly to the cumulative frequency, because the value is large here. In fact, it is a very small amount of the observations that are seen here, which is more clear from the KDE.
+            Over all CDFs <i> show statements </i>, but less intuitively - it is less noisy, and do not loose information.
+
+      			<li> <b> What is a Quantile plot? What is it good for? </b></li>
+            The quantile plot is simply the cumulative density function plotted with the percentage (from where the quantiles can be read) on the x-axis and the independent variable on the y-axis.
+            For instance, if looking at ther server response-time data set again, it shifts the focus more towards <i>'which value corresponds to 31% of the response times'</i> instead of <i>'which percentage corresponds to a response time of 400 s'</i>.
+      			<li> <b> How is a Probablity plot defined? What is it useful for? Have you ever seen one before? </b> </li>
+            In a probability plot, we assume for instance a Gaussian distribution and find the inverse of this function. The data is then plotted using this function on each data point in a sorted order. It is useful for comparing a empirical distribution to a theoretical distribution. If the data in fact follows this distribution, the data points will lie on a straight line.
+      			<li> <b> One of the reasons I like DAOST is that Janert is so suspicious of mean, median, and related summary statistics. Explain why one has to be careful when using those - and why visualization of the full data is always better.</b></li>
+            It is important to know when these measures are good to apply. As Janert states, summary statistics are most applicable with unimodal distributions with a single central peak. If there are extreme outliers, mean and standard deviation can be misleading.
+            Additionally, if there are several peaks in a distribution, the mean will most likely not correspond to the most dense data point. If there are two peaks, the mean may be right in between these two points, and may not necessarily be observed at all in the data set.
+            Janert also mentions that constructing a range of possible values by using standard deviation, the data set may not consider whether some values are physically possible within the setting. Especially standard deviation is also dependent on the number of observations in the data set.
+            None of these details will not be lost when visualizing the whole data set. Then it is up to the viewer to interpret what are probable values.
+      			<li> <b> I love box plots. When are box plots most useful? </b></li>
+            Box plots show both the median, quartiles and extremes of a data set in one plot, as well as whether there are any outliers. When comparing the width of a distribution for two or more data sets. In a case where two data sets may have the same median and thus seem quite similar, it will be much more meaningful to include this sort of visualization.
+      			<li> <b> The book doesn't mention violin plots. Are those better or worse than box plots? Why? </b></li>
+            It can't be determined black-on-white whether one plot is better than the other. A violin plot includes more information because it also shows the probability density of the data. For some viwers this may be more confusing than informative, and it may be a better idea to make an individual plot of the density (with a histogram and/or KDE) instead of attempting to include everything at once.
+      		</ul>
+        </div>
+      </section>
+      <section id="part2" class="home">
+        <div class="sections">
+          <h2> Part 2: DAOST Chapter 3 Questions </h2>
+          <ul>
+      			<li> <b>Looking at Fig 3-1, Janert writes "the data itself shows clearly that the amount of random noise in the data is small". What do you think his argument is?</b></li>
+            The argument is not clearly explained but he may refer to the fact that a viewer can quite easily envisiona curve that would interpolate all data points with very few off the points not exactly on the line.
+            Noise can be quantified using the residuals, for example the mean squared error, which would be very small if we were to construct this curve.
+            <li> <b>Can you think of a real-world example of a multivariate relationship like the one in Fig 3-3 (lower right panel)?</b></li>
+            <li> <b>What are the two methods Janert metions for smoothing noisy data? Can you think of other ones?</b></li>
+            Janert presents the two methods: <i class="teal"> weighted splines</i> and <i class="teal">LOESS</i>. Both approximate the data locally and then string these together to form a single smooth curve.
+            Many types of regression can be used in order to find trends in data points, such as linear, exponential and logistic.
+            <li> <b> What are residuals? Why is it a good idea to plot the residuals of your fit?</b></li>
+            The residuals should follow a Gaussian distribution which is important for many statistical models.
+            <li> <b>Explain in your own words the point of the smooth tube in figure 3-7.</b></li>
+            The dashed lines are representation of the points that could not be caputed by the solid lines.
+            <li> <b>What kind of relationships will a semi-log plot help you discover?</b></li>
+            log-transformation will often reveal any exponential relationship in the data by producing a linear curve. Often it is more difficult to see if there is any actual exponential relationship, because it is more difficult to judge whether a curve is exponential than linear, which is quite easy for the eye.
+            <li> <b>What kind of functions will loglog plots help you see?</b></li>
+            Lol-log plots help reveal a power-law relationship between data points. It helps us deal with large magnitudes of data more easily.
+            <li> <b>What the h#ll is banking and what element from our visual system does it use to help us see patterns? What are potential problems with banking?</b></li>
+            Banking is changing the aspect ratio and achieves the same effect as when adjusting ranges to scale a plot such that it changes its appearence.
+            It serves to satisfy the affinity the humans seem to have for proportions of 4:3.
+            Some trends in the data are shown when scaling the axis, as seen in figure 3-11 and 3-12, where the vertical axis is shrunk. This 'banks' the lines such that the slopes are approximately 45 degrees.
+            A potential problem is that some details can be lost in the process, and far-left and far-right observations become very distant from each other so they are difficult to compare. This can be fixed by making a cut-and-stack plot.
+            Banking cannot fix a data plot where the data would need a transformation, such as logaritmic.
+            <li> <b>I think figure 3-14 makes an important point about linear fits that is rarely made. What is it?</b></li>
+            Figure 3-14 shows that the best-fit line will change according to what you consider the input and response variable. This means that the predictions that may be made with linear regression change depending on the choice of variable role.
+            <li> <b>Summarize the discussion of Graphical Analysis and Presentation Graphics on pp. 68-69 in your own words.</b></li>
+            In this section, the distinction between <i> Graphical Analysis</i> and <i>Presentation Graphics</i> is made. It is elaborated how it is recommended to approach data sets when the goal is either of the two.<br>
+            Graphical analysis is used for creating an initial understanding of a data set, and for discovering new information, using visual techniques. Here no time should be spent making the graphs look nice, but several different plots of the same data can be made (and some discarded).<br>
+            Presentation graphics is for communicating data that is already understood. In this case, as much polishing regarding axises, labels, arrows and special symbols, should be applied. Also several recommendations for how to make a good plot is given:
+            Text and labels on the plot should preferably be self-explanatory, and abbrevations should be used with caution. There should not be any chance that error bars or labels cannot be interpreted correctly, so it should be included whether they are standard deviations, inter-quartile range sor other limits. Font and size of text should be appropriate, and remember units and correct publishing format.
+          </ul>
+        </div>
+      </section>
+      <section id="viz1" class="home">
+        <div class="sections">
+          <h2> Part 3: Viz 1 </h2>
+            <p> The following section is a reproduction of <a class="noformat" href="http://iquantny.tumblr.com/post/129373499164/this-is-quantifiably-the-best-month-to-go-to-the">this page</a>.
+          <div class="reproduction">
+
+            <h3 class="reprod"> I Quant NY </h3>
+              <hr>
+              <p> Quantitative Analysis of NYC Open Data: Every data set that the city releases tells a story. This blog is all about telling those stories, one data set at a time. </p>
+              <hr class="bold">
+              FEBRUARY 26, 2018 <br>
+              <h4 class="reprod"> This is Quantifiably the Best Month to go to the Farmers Market </h4>
+              <p class="maintext"> As part of a homework assignment, I ask my students at Pratt to go out and chart something of interest to them, and Katherine Savarese came back with a simple chart about farmers markets that I loved- it inspired this post.</p>
+              <p class="maintext">You probably know that farmers markets are a staple across all five boroughs of New York City, but September happens to be a very special month. Why is that?  Well, it turns out September is the month with the most unique types of fresh produce- forty three to be exact.</p>
+              <p class="maintext">To show the current offerings, we charted how many types of fruits and vegetables are available by month, and showed if they were fresh or from storage. </p></p>
+              <p class="maintext"> <i> Choose which statistic you would like to display:</i>
+              <p class="statistic" id="FruitsFresh" >Fresh fruits</p>  <p class="statistic" id="VegFresh" >Fresh vegetables </p> <p class="statistic" id="FruitsStor" >Fruits from storage </p>   <p  class="statistic" id="VegStor">Vegetables from storage</p>
+
+              <div id="vizone"> </div>
+
+
+
+              <script type="text/javascript">
+              // The data set
+              dataset = [
+              /*{index: 0, month: "Jan", count: 0},
+              {index: 0, month: "Feb", count: 0},
+              {indec: 0, month: "Mar", count: 0},
+              {index: 0, month: "Apr", count: 0},
+              {index: 0, month: "May", count: 0},
+              {index: 0, month: "Jun", count: 1},
+              {index: 0, month: "Jul", count: 7},
+              {index: 0, month: "Aug", count: 8},
+              {index: 0, month: "Sep", count: 10},
+              {index: 0, month: "Oct", count: 5},
+              {index: 0, month: "Nov", count: 0},
+              {index: 0, month: "Dec", count: 0},
+              {index: 1, month: "Jan", count: 2},
+              {index: 1, month: "Feb", count: 2},
+              {index: 1, month: "Mar", count: 1},
+              {index: 1, month: "Apr", count: 1},
+              {index: 1, month: "May", count: 1},
+              {index: 1, month: "Jun", count: 1},
+              {index: 1, month: "Jul", count: 0},
+              {index: 1, month: "Aug", count: 0},
+              {index: 1, month: "Sep", count: 0},
+              {index: 1, month: "Oct", count: 0},
+              {index: 1, month: "Nov", count: 2},
+              {index: 1, month: "Dec", count: 2},
+              {index: 2, month: "Jan", count: 0},
+              {index: 2, month: "Feb", count: 0},
+              {index: 2, month: "Mar", count: 0},
+              {index: 2, month: "Apr", count: 2},
+              {index: 2, month: "May", count: 11},
+              {index: 2, month: "Jun", count: 16},
+              {index: 2, month: "Jul", count: 23},
+              {index: 2, month: "Aug", count: 28},
+              {index: 2, month: "Sep", count: 33},
+              {index: 2, month: "Oct", count: 31},
+              {index: 2, month: "Nov", count: 11},
+              {index: 2, month: "Dec", count: 3},*/
+              {index: 3, month: "Jan", count: 9},
+              {index: 3, month: "Feb", count: 9},
+              {index: 3, month: "Mar", count: 6},
+              {index: 3, month: "Apr", count: 3},
+              {index: 3, month: "May", count: 3},
+              {index: 3, month: "Jun", count: 3},
+              {index: 3, month: "Jul", count: 2},
+              {index: 3, month: "Aug", count: 1},
+              {index: 3, month: "Sep", count: 0},
+              {index: 3, month: "Oct", count: 0},
+              {index: 3, month: "Nov", count: 6},
+              {index: 3, month: "Dec", count: 8} ];
+              var w = 700;
+              var h = 400;
+              var padding = 30;
+              // define key function, when binding data
+              var key = function(d) {
+                  return d.key;
+              };
+              // Create x scale
+              var xScale = d3.scaleBand()
+                      .domain(d3.range(dataset.length + 1))
+                      .range([0, w])
+                      .paddingInner(0.02);
+              // Create labels for the x axis
+              var xLabel = d3.scaleBand()
+                    .domain(["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
+                    .rangeRound([0, w])
+                    .paddingInner(0.02);
+              // Create y scale
+              var yScale = d3.scaleLinear()
+                      .domain([0, d3.max(dataset, function(d) {
+                        return d.count;
+                      })])
+                      .range([h, 0]);
+              // Define x axis
+              var xAxis = d3.axisBottom()
+                    .scale(xLabel)
+                    .ticks(12);
+              // Define y axis
+              var yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .ticks(5);
+              //Create SVG element
+              var svg = d3.select("#vizone")
+                    .append("svg")
+                    .attr("width", w + padding)
+                    .attr("height", h + padding);
+                    // Define clipping path
+              svg.append("clipPath")
+                  .attr("id", "chart-area")
+                  .append("rect")
+                  .attr("x", 0)
+                  .attr("y", 0)
+                  .attr("width", w)
+                  .attr("height", h);
+              //Create bars
+              svg.append("g")
+                  .attr("id", "rects")
+                  .attr("clip-path", "url(#chart-area)")
+                  .selectAll("rect")
+                  .data(dataset, key)
+                  .enter()
+                  .append("rect")
+                  .attr("x", function(d, i) {
+                    return xScale(i + 1);
+                  })
+                  .attr("y", function(d) {
+                    return yScale(d.count);
+                  })
+                  .attr("width", xScale.bandwidth())
+                  .attr("height", function(d, i) {
+                    return h - yScale(d.count);
+                  })
+                  .attr("fill", function(d) {
+                    return "rgb(0, 0, " + Math.round(d.count * 10) + ")";
+                  });
+              //Create labels
+              svg.selectAll("text")
+                 .data(dataset, key)
+                 .enter()
+                 .append("text")
+                 .text(function(d) {
+                    return d.count;
+                 })
+                 .attr("text-anchor", "middle")
+                 .attr("x", function(d, i) {
+                    return xScale(i + 1) + xScale.bandwidth() / 2;
+                 })
+                 .attr("y", function(d) {
+                    return yScale(d.count) + 14;
+                 })
+                 .attr("font-family", "sans-serif")
+                 .attr("font-size", "12px")
+                 .attr("fill", "white");
+              // Create x axis
+              svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + (h) + ")")
+                    .call(xAxis);
+              // Create y axis
+              svg.append("g")
+                    .attr("class", "y axis")
+                    .attr("transform", "translate(" + padding + ", 0)")
+                    .call(yAxis);
+              // When clicked update with new data sets
+              d3.selectAll("p")
+                  .on("click", function() {
+                    var paragraphID = d3.select(this).attr("id");
+                    if (paragraphID == "FruitsFresh") {
+                      dataset = [{index: 0, month: "Jan", count: 0},
+                      {index: 0, month: "Feb", count: 0},
+                      {indec: 0, month: "Mar", count: 0},
+                      {index: 0, month: "Apr", count: 0},
+                      {index: 0, month: "May", count: 0},
+                      {index: 0, month: "Jun", count: 1},
+                      {index: 0, month: "Jul", count: 7},
+                      {index: 0, month: "Aug", count: 8},
+                      {index: 0, month: "Sep", count: 10},
+                      {index: 0, month: "Oct", count: 5},
+                      {index: 0, month: "Nov", count: 0},
+                      {index: 0, month: "Dec", count: 0}];
+                    } else if (paragraphID == "VegFresh") {
+                      dataset = [  {index: 2, month: "Jan", count: 0},
+                      {index: 2, month: "Feb", count: 0},
+                      {index: 2, month: "Mar", count: 0},
+                      {index: 2, month: "Apr", count: 2},
+                      {index: 2, month: "May", count: 11},
+                      {index: 2, month: "Jun", count: 16},
+                      {index: 2, month: "Jul", count: 23},
+                      {index: 2, month: "Aug", count: 28},
+                      {index: 2, month: "Sep", count: 33},
+                      {index: 2, month: "Oct", count: 31},
+                      {index: 2, month: "Nov", count: 11},
+                      {index: 2, month: "Dec", count: 3}];
+                    } else if (paragraphID == "FruitsStor") {
+                      dataset = [{index: 1, month: "Jan", count: 2},
+                      {index: 1, month: "Feb", count: 2},
+                      {index: 1, month: "Mar", count: 1},
+                      {index: 1, month: "Apr", count: 1},
+                      {index: 1, month: "May", count: 1},
+                      {index: 1, month: "Jun", count: 1},
+                      {index: 1, month: "Jul", count: 0},
+                      {index: 1, month: "Aug", count: 0},
+                      {index: 1, month: "Sep", count: 0},
+                      {index: 1, month: "Oct", count: 0},
+                      {index: 1, month: "Nov", count: 2},
+                      {index: 1, month: "Dec", count: 2}];
+                    } else if (paragraphID == "VegStor") {
+                      dataset = [{index: 3, month: "Jan", count: 9},
+                      {index: 3, month: "Feb", count: 9},
+                      {index: 3, month: "Mar", count: 6},
+                      {index: 3, month: "Apr", count: 3},
+                      {index: 3, month: "May", count: 3},
+                      {index: 3, month: "Jun", count: 3},
+                      {index: 3, month: "Jul", count: 2},
+                      {index: 3, month: "Aug", count: 1},
+                      {index: 3, month: "Sep", count: 0},
+                      {index: 3, month: "Oct", count: 0},
+                      {index: 3, month: "Nov", count: 6},
+                      {index: 3, month: "Dec", count: 8}];
+                    }
+                // Update x scale
+                // xScale.domain(d3.range(dataset.length + 1));
+                // Update y scale
+                yScale.domain([0, d3.max(dataset, function(d) {
+                  return d.count;
+                })])
+                //.range([h, 0]);
+                // Update the bars
+                svg.selectAll("rect")
+                   .data(dataset)
+                   .transition()
+                   .delay(function(d, i) {
+                     return i / dataset.length * 1000;
+                   })
+                   .duration(500)
+                   .ease(d3.easeLinear)
+                   .attr("x", function(d, i) {
+                     return xScale(i);
+                   })
+                   .attr("y", function(d) {
+                      return yScale(d.count);
+                   })
+                   .attr("width", xScale.bandwidth())
+                   .attr("height", function(d) {
+                     return h - yScale(d.count);
+                   })
+                   .attr("fill", function(d) {
+                    return "rgb(0, 0, " + Math.round(d.count * 10) + ")";
+                  });
+                    // Update labels
+                    svg.selectAll("text")
+                       .data(dataset)
+                       .transition()
+                       .delay(function(d, i) {
+                         return i / dataset.length * 1000;
+                       })
+                       .duration(1000)
+                       .text(function(d) {
+                          return d.count;
+                       })
+                       .attr("text-anchor", "middle")
+                       .attr("x", function(d, i) {
+                          return xScale(i + 1) + xScale.bandwidth() / 2;
+                       })
+                       .attr("y", function(d) {
+                          return yScale(d.count) + 14;
+                       })
+                       .attr("font-family", "sans-serif")
+                       .attr("font-size", "11px")
+                       .attr("fill", "white");
+                      // Update y axis
+                       svg.select(".y.axis")
+                            .transition()
+                            .duration(1000)
+                            .call(yAxis);
+                  });
+
+                </script>
+
+              <p class="maintext">If you miss the month of September, you might be behind the fruit curve, but there are plenty more months of vegetables left.  The chart shows that fresh vegetables are available 9 out of 12 months, but fruit is only available 5 out of 12. Now if only we could quantify how delicious the produce is… </p>
+
+              <p class="maintext">Data from: <a class="maintext" href="http://www.grownyc.org/greenmarket/whatsavailable">http://www.grownyc.org/greenmarket/whatsavailable</a></p>
+
+
+        </div>
+      </section>
+      <section id="viztwo" class="home">
+        <div class="sections">
+          <h2> Part 4: Viz 2 </h2>
+        </div>
+      </section>
+    </p>
+
+  </body>
+</html>
