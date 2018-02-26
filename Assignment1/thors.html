@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset ="utf-8">
+      <title>Page Title</title>
+      <link rel="stylesheet" type ="text/css" href="style.css">
+      <script type="text/javascript" src="d3.js"></script>
+      <script type="text/javascript" src="d3-legend.min.js"></script>
+
+      <style>
+
+    </style>
+  </head>
+    <body>
+
+<script type="text/javascript">
+var h = 420;
+var w = 700;
+var padding = 10
+var bordercolor = "black";
+var border = 2;
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height",h)
+            .attr("border",1);
+var borderPath = svg.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("height", h)
+            .attr("width", w)
+            .style("stroke", bordercolor)
+            .style("fill", "none")
+            .style("stroke-width", border);
+d3.text("Marathon.csv", function(data){
+    var dataset = d3.csvParseRows(data)
+    var Xscale= d3.scaleLinear()
+                  .domain([
+                    d3.min(dataset, function(d){ return (d[0] - 5)}),
+                    d3.max(dataset, function(d){ return (d[0])})
+                  ])
+                  .range([30,600]);
+    var parseTime = d3.timeParse("%H:%M:%S");
+    var Yscale= d3.scaleLinear()
+                  .domain([120, 220])
+                  .range([390,10]);
+    var xAxis = d3.axisBottom()
+                  .scale(Xscale);
+    var yAxis = d3.axisLeft()
+                  .scale(Yscale)
+                  .tickValues([120,130,140,150,160,170,180,190,200,210,220]);
+    var Ordinal = d3.scaleOrdinal()
+                    .domain(["Men", "Women"])
+                    .range(["blue", "red"]);
+    var svg = d3.select("svg");
+    var lineMen = d3.line()
+                 .defined(function(d) { return d[5] ==="Men"})
+                 .x(function(d) {
+                   return Xscale(d[0]);
+                 })
+                 .y(function(d) {
+                   var hms = d[3];
+                   var a = hms.split(':');
+                   var minutes = (+a[0])*60 + (+a[1]) + (+a[2])/60;
+                   return Yscale(minutes);
+                 });
+     var lineWomen = d3.line()
+                  .defined(function(d) { return d[5] ==="Women"})
+                  .x(function(d) {
+                    return Xscale(d[0]);
+                  })
+                  .y(function(d) {
+                    var hms = d[3];
+                    var a = hms.split(':');
+                    var minutes = (+a[0])*60 + (+a[1]) + (+a[2])/60;
+                    return Yscale(minutes);
+                  });
+    svg.selectAll("circle")
+       .data(dataset)
+       .enter()
+       .append("circle")
+       .attr("cx", function(d){
+          return Xscale(d[0])
+          })
+        .attr("cy", function(d) {
+          var hms = d[3];
+          var a = hms.split(':');
+          var minutes = (+a[0])*60 + (+a[1]) + (+a[2])/60;
+          return Yscale(minutes)})
+        .attr("r",3)
+        .attr("fill", "none")
+        .attr("stroke", function(d){
+          if (d[5] === "Men"){
+            return "rgb(10, 100, 0)";
+          }
+          else
+            return "red";
+        })
+    svg.append("path")
+       .datum(dataset)
+       .attr("class","lineMen")
+       .attr("d",lineMen);
+   svg.append("path")
+      .datum(dataset)
+      .attr("class","lineWomen")
+      .attr("d",lineWomen);
+    svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + 390 + ")")
+    .call(xAxis);
+    svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + 40 + ","+ 0 +")")
+    .call(yAxis);
+    svg.append("g")
+       .attr("class","legendOrdinal")
+       .attr("transform","translate(60,30)");
+    var legendOrdinal = d3.legendColor()
+                          .shape("path", d3.symbol().type(d3.symbolCircle).size(150)())
+                          .shapePadding(10)
+                          .scale(Ordinal)
+    svg.select(".legendOrdinal")
+       .call(legendOrdinal);
+})
+</script>
+
+  </body>
+</html>

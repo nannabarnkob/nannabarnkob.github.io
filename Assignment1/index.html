@@ -6,11 +6,12 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="d3.js"></script>
+    <script type="text/javascript" src="d3-legend.min.js"></script>
 	</head>
 	<body>
   <p>
     <h1> Assignment 1: Social Data Analysis and Visualization </h1>
-    <center> <a href="#part1">PART 1</a> <a href="#part2">PART 2</a> <a href="#viz1">VIZ 1</a><a href="Indexmappe/index.html">VIZ 1</a> <a href="#viz2">VIZ 2</a> </center>
+    <center> <a href="#part1">PART 1</a> <a href="#part2">PART 2</a> <a href="#viz1">VIZ 1</a> <a href="#viz2">VIZ 2</a> </center>
       <section id="part1" class="home">
         <div class="sections">
           <h2> Part 1: DAOST Chapter Questions</h2>
@@ -20,13 +21,13 @@
             Most importantly, the point of a jitter plot is to create a quick overview of the data.
             By doing this, the viewer will gain a sense of the amount of data points mapping to this position, and whether they occur several times - thus we get a sense of density around the value.
 
-            <li>  <b> Explain in your own words the point of figure 2-3. (I'm going to skip saying "in your own words" going forward, but I hope you get the point; I expect all answers to be in your own words). </b></li>
+            <li>  <b> Explain in your own words the point of figure 2-3. </b></li>
             The two histograms in figure 2-3 underline the importance of choosing data bins that represent the data as correctly as possible.
             The difference in how the data bins are made are both in where the borders of the bins are positioned - also bin width is important to how the data is interpreted, but this is not highlighted in this figure.
             The top panel implies a uniform distribution of the data points, where the bottom panel would imply a normal distribution.
             Effectively, both data sets are too small to give a clear idea about distribution.
 
-      			<li> <b>The author of DAOST (Philipp Janert) likes KDEs (and think they're better than histograms). And I don't. I didn't give a detailed explanation in the video, but now that works to my advantage. I'll ask you guys to think about this and thereby create an excellent exercise: When can KDEs be misleading? (I'll provide the answer in a later lecture :)</b></li>
+      			<li> <b>The author of DAOST (Philipp Janert) likes KDEs (and think they're better than histograms). And I don't. I didn't give a detailed explanation in the video, but now that works to my advantage. I'll ask you guys to think about this and thereby create an excellent exercise: When can KDEs be misleading?</b></li>
             Just like histograms, KDEs can be misleading because the trends that are shown in the data are dependent on bandwidth chosen. This is mentioned in the text as the <i>bias-variance trade-off</i>.
             Looking at figure 2-4 in the chapter, it is seen how the bandwidth can affect how extreme an observation seems and may be interpreted by the viewer. At the peaks, the histogram counts reach 14. With the bandwith curve of 2.5, the peak only reaches a little higher than 2 counts, which is about 15% of the true density at this point. The more narrow bandwidth of 0.8 only reaches a little below half of the true density.
             It seems that the KDE is effectively more like a trade-off between retaining the integrity of the data set and a smooth, nice looking curve. This turns out in favour of looks instead of presenting the data truthfully. Finally, much people interpreting a KDE plot may not know to what extend the curve is smoothened because bandwidth is an abstract and complex parameter, especially compared to the more simple measure of how bin size affects a histogram.
@@ -107,47 +108,9 @@
 
               <div id="vizone"> </div>
 
-
-
               <script type="text/javascript">
-              // The data set
-              dataset = [
-              /*{index: 0, month: "Jan", count: 0},
-              {index: 0, month: "Feb", count: 0},
-              {indec: 0, month: "Mar", count: 0},
-              {index: 0, month: "Apr", count: 0},
-              {index: 0, month: "May", count: 0},
-              {index: 0, month: "Jun", count: 1},
-              {index: 0, month: "Jul", count: 7},
-              {index: 0, month: "Aug", count: 8},
-              {index: 0, month: "Sep", count: 10},
-              {index: 0, month: "Oct", count: 5},
-              {index: 0, month: "Nov", count: 0},
-              {index: 0, month: "Dec", count: 0},
-              {index: 1, month: "Jan", count: 2},
-              {index: 1, month: "Feb", count: 2},
-              {index: 1, month: "Mar", count: 1},
-              {index: 1, month: "Apr", count: 1},
-              {index: 1, month: "May", count: 1},
-              {index: 1, month: "Jun", count: 1},
-              {index: 1, month: "Jul", count: 0},
-              {index: 1, month: "Aug", count: 0},
-              {index: 1, month: "Sep", count: 0},
-              {index: 1, month: "Oct", count: 0},
-              {index: 1, month: "Nov", count: 2},
-              {index: 1, month: "Dec", count: 2},
-              {index: 2, month: "Jan", count: 0},
-              {index: 2, month: "Feb", count: 0},
-              {index: 2, month: "Mar", count: 0},
-              {index: 2, month: "Apr", count: 2},
-              {index: 2, month: "May", count: 11},
-              {index: 2, month: "Jun", count: 16},
-              {index: 2, month: "Jul", count: 23},
-              {index: 2, month: "Aug", count: 28},
-              {index: 2, month: "Sep", count: 33},
-              {index: 2, month: "Oct", count: 31},
-              {index: 2, month: "Nov", count: 11},
-              {index: 2, month: "Dec", count: 3},*/
+              // The start data set
+              var dataset = [
               {index: 3, month: "Jan", count: 9},
               {index: 3, month: "Feb", count: 9},
               {index: 3, month: "Mar", count: 6},
@@ -160,9 +123,9 @@
               {index: 3, month: "Oct", count: 0},
               {index: 3, month: "Nov", count: 6},
               {index: 3, month: "Dec", count: 8} ];
-              var w = 700;
+              var w = 610;
               var h = 400;
-              var padding = 30;
+              var padding = 50;
               // define key function, when binding data
               var key = function(d) {
                   return d.key;
@@ -170,11 +133,17 @@
               // Create x scale
               var xScale = d3.scaleBand()
                       .domain(d3.range(dataset.length + 1))
-                      .range([0, w])
+                      .rangeRound([0, w + padding])
                       .paddingInner(0.02);
+              // Create y scale
+              var yScale = d3.scaleLinear()
+                      .domain([0, d3.max(dataset, function(d) {
+                        return d.count;
+                      })])
+                      .range([h + padding * 2, 0]);
               // Create labels for the x axis
               var xLabel = d3.scaleBand()
-                    .domain(["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
+                    .domain(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
                     .rangeRound([0, w])
                     .paddingInner(0.02);
               // Create y scale
@@ -194,36 +163,26 @@
               //Create SVG element
               var svg = d3.select("#vizone")
                     .append("svg")
-                    .attr("width", w + padding)
-                    .attr("height", h + padding);
-              // Define clipping path
-              svg.append("clipPath")
-                  .attr("id", "chart-area")
-                  .append("rect")
-                  .attr("x", 0)
-                  .attr("y", 0)
-                  .attr("width", w)
-                  .attr("height", h);
+                    .attr("width", w + padding * 2)
+                    .attr("height", h + padding * 3);
               //Create bars
               svg.append("g")
-                  .attr("id", "rects")
-                  .attr("clip-path", "url(#chart-area)")
                   .selectAll("rect")
                   .data(dataset, key)
                   .enter()
                   .append("rect")
                   .attr("x", function(d, i) {
-                    return xScale(i + 1);
+                    return xScale(i + 1) + padding;
                   })
                   .attr("y", function(d) {
-                    return yScale(d.count);
+                    return yScale(d.count) + padding * 2;
                   })
                   .attr("width", xScale.bandwidth())
                   .attr("height", function(d, i) {
                     return h - yScale(d.count);
                   })
                   .attr("fill", function(d) {
-                    return "rgb(0, 0, " + Math.round(d.count * 10) + ")";
+                    return "rgb(10, " + Math.round(70 + d.count * 4) + "," + Math.round(70 + d.count * 4) + ")";
                   });
               //Create labels
               svg.selectAll("text")
@@ -235,30 +194,54 @@
                  })
                  .attr("text-anchor", "middle")
                  .attr("x", function(d, i) {
-                    return xScale(i + 1) + xScale.bandwidth() / 2;
+                    return xScale(i + 1) + xScale.bandwidth() / 2 + padding;
                  })
                  .attr("y", function(d) {
-                    return yScale(d.count) + 14;
+                    return yScale(d.count) + 20 + padding * 2;
                  })
                  .attr("font-family", "sans-serif")
-                 .attr("font-size", "12px")
+                 .attr("font-size", "14px")
                  .attr("fill", "white");
+                 // Create x axis label
+                 svg.append("text")
+                      .attr("transform", "translate(" + (w/2 + padding) + " , " + (h + padding * 3) + " )")
+                      .style("text-anchor", "middle")
+                      .text("Months")
+                      .attr("fill", "black")
+                      .attr("font-size","16px");
+                  // Create y axis label
+                  svg.append("text")
+                       .attr("transform", "rotate(-90)")
+                       .attr("x", -h/2 - padding * 2)
+                       .attr("y", padding)
+                       .style("text-anchor", "middle")
+                       .text("Number of Unique Kinds of Produce")
+                       .attr("fill", "black")
+                       .attr("font-size","16px");
+                  // Create header
+                  svg.append("text")
+                        .attr("transform", "translate(" + (w/2 + padding*2) + " , " + 20 + ")")
+                        .style("text-anchor", "middle")
+                        .text("Fresh fruit available per month")
+                        .attr("font-weight", "bold")
+                        .attr("class", "header")
+                        .attr("font-size","25px");
               // Create x axis
               svg.append("g")
                     .attr("class", "x axis")
-                    .attr("transform", "translate(0," + (h) + ")")
+                    .attr("transform", "translate(" + (padding * 2) + "," + (h + padding * 2) + ")")
                     .call(xAxis);
               // Create y axis
               svg.append("g")
                     .attr("class", "y axis")
-                    .attr("transform", "translate(" + padding + ", 0)")
+                    .attr("transform", "translate(" + (padding * 2) + ", " + (padding * 2) + ")")
                     .call(yAxis);
               // When clicked update with new data sets
               d3.selectAll("p")
                   .on("click", function() {
                     var paragraphID = d3.select(this).attr("id");
                     if (paragraphID == "FruitsFresh") {
-                      dataset = [{index: 0, month: "Jan", count: 0},
+                      var dataset = [{index: 0, month: "Jan", count: 0},
                       {index: 0, month: "Feb", count: 0},
                       {indec: 0, month: "Mar", count: 0},
                       {index: 0, month: "Apr", count: 0},
@@ -270,8 +253,18 @@
                       {index: 0, month: "Oct", count: 5},
                       {index: 0, month: "Nov", count: 0},
                       {index: 0, month: "Dec", count: 0}];
+
+                      svg.select(".header")
+                            .transition()
+                            .duration(1000)
+                            .attr("transform", "translate(" + (w/2 + padding*2) + " , " + 20 + ")")
+                            .style("text-anchor", "middle")
+                            .text("Fresh fruit types available per month")
+                            .attr("font-weight", "bold")
+                            .attr("font-size","25px");
+
                     } else if (paragraphID == "VegFresh") {
-                      dataset = [  {index: 2, month: "Jan", count: 0},
+                      var dataset = [  {index: 2, month: "Jan", count: 0},
                       {index: 2, month: "Feb", count: 0},
                       {index: 2, month: "Mar", count: 0},
                       {index: 2, month: "Apr", count: 2},
@@ -283,8 +276,18 @@
                       {index: 2, month: "Oct", count: 31},
                       {index: 2, month: "Nov", count: 11},
                       {index: 2, month: "Dec", count: 3}];
+
+                      svg.select(".header")
+                            .transition()
+                            .duration(1000)
+                            .attr("transform", "translate(" + (w/2 + padding*2) + " , " + 20 + ")")
+                            .style("text-anchor", "middle")
+                            .text("Fresh vegetable types available per month")
+                            .attr("font-weight", "bold")
+                            .attr("font-size","25px");
+
                     } else if (paragraphID == "FruitsStor") {
-                      dataset = [{index: 1, month: "Jan", count: 2},
+                      var dataset = [{index: 1, month: "Jan", count: 2},
                       {index: 1, month: "Feb", count: 2},
                       {index: 1, month: "Mar", count: 1},
                       {index: 1, month: "Apr", count: 1},
@@ -296,8 +299,18 @@
                       {index: 1, month: "Oct", count: 0},
                       {index: 1, month: "Nov", count: 2},
                       {index: 1, month: "Dec", count: 2}];
+
+                      svg.select(".header")
+                            .transition()
+                            .duration(1000)
+                            .attr("transform", "translate(" + (w/2 + padding*2) + " , " + 20 + ")")
+                            .style("text-anchor", "middle")
+                            .text("Fruits from storage types available per month")
+                            .attr("font-weight", "bold")
+                            .attr("font-size","25px");
+
                     } else if (paragraphID == "VegStor") {
-                      dataset = [{index: 3, month: "Jan", count: 9},
+                      var dataset = [{index: 3, month: "Jan", count: 9},
                       {index: 3, month: "Feb", count: 9},
                       {index: 3, month: "Mar", count: 6},
                       {index: 3, month: "Apr", count: 3},
@@ -309,14 +322,21 @@
                       {index: 3, month: "Oct", count: 0},
                       {index: 3, month: "Nov", count: 6},
                       {index: 3, month: "Dec", count: 8}];
+
+                      svg.select(".header")
+                            .transition()
+                            .duration(1000)
+                            .ease(d3.easeElastic)
+                            .attr("transform", "translate(" + (w/2 + padding*2) + " , " + 20 + ")")
+                            .style("text-anchor", "middle")
+                            .text("Vegetables from storage types available per month")
+                            .attr("font-weight", "bold")
+                            .attr("font-size","25px");
                     }
-                // Update x scale
-                // xScale.domain(d3.range(dataset.length + 1));
                 // Update y scale
                 yScale.domain([0, d3.max(dataset, function(d) {
                   return d.count;
-                })])
-                //.range([h, 0]);
+                })]);
                 // Update the bars
                 svg.selectAll("rect")
                    .data(dataset)
@@ -324,41 +344,41 @@
                    .delay(function(d, i) {
                      return i / dataset.length * 1000;
                    })
-                   .duration(500)
+                   .duration(1000)
                    .ease(d3.easeLinear)
                    .attr("x", function(d, i) {
-                     return xScale(i);
+                     return xScale(i + 1) + padding;
                    })
                    .attr("y", function(d) {
-                      return yScale(d.count);
+                      return yScale(d.count) + padding * 2;
                    })
                    .attr("width", xScale.bandwidth())
                    .attr("height", function(d) {
                      return h - yScale(d.count);
                    })
                    .attr("fill", function(d) {
-                    return "rgb(0, 0, " + Math.round(d.count * 10) + ")";
+                    return "rgb(10, " + Math.round(70 + d.count * 4) + "," + Math.round(70 + d.count * 4) + ")";
                   });
                     // Update labels
-                  svg.selectAll("text")
-                      .data(dataset)
+                    svg.selectAll("text")
+                       .data(dataset)
                        .transition()
                        .delay(function(d, i) {
                          return i / dataset.length * 1000;
                        })
-                       .duration(1000)
+                       .duration(1100)
                        .text(function(d) {
                           return d.count;
                        })
                        .attr("text-anchor", "middle")
                        .attr("x", function(d, i) {
-                          return xScale(i + 1) + xScale.bandwidth() / 2;
+                          return xScale(i + 1) + xScale.bandwidth() / 2 + padding;
                        })
                        .attr("y", function(d) {
-                          return yScale(d.count) + 14;
+                          return yScale(d.count) + padding * 2 + 20;
                        })
                        .attr("font-family", "sans-serif")
-                       .attr("font-size", "11px")
+                       .attr("font-size", "14px")
                        .attr("fill", "white");
                       // Update y axis
                        svg.select(".y.axis")
@@ -366,19 +386,32 @@
                             .duration(1000)
                             .call(yAxis);
                   });
-
-                </script>
-
+              </script>
+              <center><p class="maintext"> <i>The plot displays the number of unique produce types for each category (fresh fruit, fresh vegetables, stored fruit and stored vegetables). Each is grouped according to month. </i> </center>
+                <br>
               <p class="maintext">If you miss the month of September, you might be behind the fruit curve, but there are plenty more months of vegetables left.  The chart shows that fresh vegetables are available 9 out of 12 months, but fruit is only available 5 out of 12. Now if only we could quantify how delicious the produce is… </p>
-
               <p class="maintext">Data from: <a class="maintext" href="http://www.grownyc.org/greenmarket/whatsavailable">http://www.grownyc.org/greenmarket/whatsavailable</a></p>
 
 
         </div>
       </section>
-      <section id="viztwo" class="home">
+      <section id="viz2" class="home">
         <div class="sections">
           <h2> Part 4: Viz 2 </h2>
+          <p> The data for this assignment was found on the following Wikipedia-page <a class="noformat" href="https://en.wikipedia.org/wiki/List_of_winners_of_the_Boston_Marathon"> here</a>.
+            <div class="reproduction">
+              <h4 class="reprod"> Boston Marathon Winning Times</h4>
+                <hr>
+                <p> The following plot is a visualization of the  Boston Marathon winning times. Use the options below to toggle between data visualizations.</p>
+                <hr class="bold">
+                <div id="viztwo"> </div>
+                <center><iframe src="thors.html" width="800" height="600" style="border:none" marginheight="5" name="iframe_b"></iframe></center>
+
+
+            </div>
+
+
+
         </div>
       </section>
     </p>
