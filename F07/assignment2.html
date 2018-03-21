@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: Map value labels</title>
+		<script type="text/javascript" src="http://d3js.org/d3.v4.min.js"></script>
+		<style type="text/css">
+
+			div {
+				margin-bottom: 10px;
+			}
+
+			.pan rect,
+			.zoom rect {
+				fill: black;
+				opacity: 0.2;
+			}
+
+			.zoom rect {
+				rx: 5;  /* Rounded corners */
+				ry: 5;
+			}
+
+			.pan text,
+			.zoom text {
+				fill: black;
+				font-size: 18px;
+				text-anchor: middle;
+			}
+
+			.pan:hover rect,
+ 			.pan:hover text,
+			.zoom:hover rect,
+ 			.zoom:hover text {
+				fill: blue;
+			}
+
+			.label {
+				font-family: Helvetica, sans-serif;
+				font-size: 11px;
+				fill: black;
+				text-anchor: middle;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<div>
+			<button id="reset">Reset</button>
+		</div>
+<br> </br>
+
+		<script type="text/javascript">
+
+			//Width and height
+			var w = 600;
+			var h = 500;
+      //Width and heigh for line chart
+
+      var wLine = 1000;
+      var hLine = 150;
+
+      // define padding
+      var padding = 20;
+
+      //Define map projection
+			var projection = d3.geoMercator()
+                   .center([-74.31, 40.855])
+                   .translate([w/2, h/2])
+                   .scale([70000]);
+
+			//Define path generator
+			var path = d3.geoPath()
+							 .projection(projection);
+
+			//Define quantize scale to sort data values into buckets of color
+			//var color = d3.scaleQuantize()
+				//				.range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
+								//Colors taken from colorbrewer.js, included in the D3 download
+      var color = ["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"];
+			//Number formatting for population values
+			var formatAsThousands = d3.format(",");  //e.g. converts 123456 to "123,456"
+
+			//Number formatting for ag productivity values
+			var formatDecimals = d3.format(".3");  //e.g. converts 1.23456 to "1.23"
+
+			//Create SVG element
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+      //Create SVG element for the line chart
+      var svgLine = d3.select("body")
+            .append("svg")
+            .attr("width", wLine)
+            .attr("height", hLine);
+
+
+			//Define what to do when panning or zooming
+			var zooming = function(d) {
+
+				//Log out d3.event.transform, so you can see all the goodies inside
+				console.log(d3.event.transform);
+
+				//New offset array
+				var offset = [d3.event.transform.x, d3.event.transform.y];
+
+				//Calculate new scale
+				var newScale = d3.event.transform.k * 5000;
+
+				//Update projection with new offset and scale
+				projection.translate(offset)
+						  .scale(newScale);
+
+				//Update all paths and circles
+				svg.selectAll("path")
+					.attr("d", path);
+
+				svg.selectAll("circle")
+					.attr("cx", function(d) {
+						return projection([d.Longitude, d.Latitude])[0];
+					})
+					.attr("cy", function(d) {
+						return projection([d.Longitude, d.Latitude])[1];
+					});
+
+				svg.selectAll(".label")
+					.attr("x", function(d) {
+						 return path.centroid(d)[0];
+					})
+					.attr("y", function(d) {
+						 return path.centroid(d)[1];
+					});
+
+			}
+
+			//Then define the zoom behavior
+			var zoom = d3.zoom()
+						 //.scaleExtent([ 0.2, 2.0 ])
+						 .translateExtent([[ -300, -200 ], [ 300, 200 ]])
+						 .on("zoom", zooming);
+
+			//The center of the country, roughly
+			var center = projection([-434.53, 41.0]);
+
+			//Create a container in which all zoom-able elements will live
+			var map = svg.append("g")
+						.attr("id", "map")
+						.call(zoom)  //Bind the zoom behavior
+  						.call(zoom.transform, d3.zoomIdentity  //Then apply the initial transform
+							.translate(w/2, h/2)
+							.scale(8)
+							.translate(-center[0], -center[1]));
+
+			//Create a new, invisible background rect to catch zoom events
+			map.append("rect")
+				.attr("x", 0)
+				.attr("y", 0)
+				.attr("width", w)
+				.attr("height", h)
+				.attr("opacity", 0);
+
+				//Load in GeoJSON data
+				d3.json("boroughs.geojson", function(json) {
+          console.log(json);
+					//Bind data and create one path per GeoJSON feature
+					map.selectAll("path")
+					   .data(json.features)
+					   .enter()
+					   .append("path")
+					   .attr("d", path)
+             .attr("fill", function(d, i) {
+   						return color[i];
+   					});
+
+					 //Create one label per state
+					 map.selectAll("text")
+						.data(json.features)
+						.enter()
+						.append("text")
+						.attr("class", "label")
+						.attr("x", function(d) {
+							 return path.centroid(d)[0];
+						})
+						.attr("y", function(d) {
+							 return path.centroid(d)[1];
+						})
+            .style("stroke", "gray")
+            .style("fill", "black")
+            .style("font-size", "16px")
+            .style("stroke-width", 0.50)
+
+						.text(function(d) {
+							 if (d.properties.BoroName) {
+								 return d.properties.BoroName;
+							 };
+						});
+
+					//Load in cities data
+					d3.csv("all_murder.csv", function(data) {
+
+						map.selectAll("circle")
+						   .data(data)
+						   .enter()
+						   .append("circle")
+						   .attr("cx", function(d) {
+							   return projection([d.Longitude, d.Latitude])[0];
+						   })
+						   .attr("cy", function(d) {
+							   return projection([d.Longitude, d.Latitude])[1];
+						   })
+						   .attr("r", function(d) {
+								return 3;
+						   })
+						   .style("fill", "yellow")
+						   .style("stroke", "gray")
+						   .style("stroke-width", 0.25)
+						   .style("opacity", 0.75);
+						   //.append("title")			//Simple tooltip
+            console.log(data)
+						createPanButtons();
+						createZoomButtons();
+
+          // for converting dates to strings
+          var formatTime = d3.timeFormat("%B");
+
+            //For converting strings to Dates
+          var parseTime = d3.timeParse("%m/%d/%Y");
+
+          var nested_data = d3.nest()
+          .key(function(d) { return d.RPT_DT; })
+          .rollup(function(leaves) { return leaves.length; })
+          .entries(data);
+          console.log(nested_data)
+
+          var xScaleLine = d3.scaleTime()
+  							   .domain([
+  									d3.min(nested_data, function(d) { return parseTime(d.key) }),
+  									d3.max(nested_data, function(d) { return parseTime(d.key); })
+  								])
+  							   .range([padding, wLine - padding * 2]);
+
+          var yScaleLine = d3.scaleLinear()
+                  .domain([0, d3.max(nested_data, function(d) { return d.value; })])
+								  //.range([h - padding, padding / 2])
+                  .range([0, hLine]);
+
+          var xAxis = d3.axisBottom()
+    				      .scale(xScaleLine)
+          		    .ticks(10)
+            		  //.tickFormat(formatTime);
+
+          				//Define Y axis
+          var yAxis = d3.axisLeft()
+    					   .scale(yScaleLine)
+          	     .ticks(5);
+
+                //Define key function, to be used when binding data
+          var key = function(d) {
+                return d.key;
+                };
+
+          // brush timeeeeeeeee
+          var brush = d3.brushX()
+
+          function brushended() {
+            if (!d3.event.sourceEvent) return; // Only transition after input.
+            if (!d3.event.selection) return; // Ignore empty selections.
+            var d0 = d3.event.selection.map(x.invert),
+            d1 = d0.map(d3.timeDay.round);
+
+                              // If empty when rounded, use floor & ceil instead.
+                              if (d1[0] >= d1[1]) {
+                                d1[0] = d3.timeDay.floor(d0[0]);
+                                d1[1] = d3.timeDay.offset(d1[0]);
+                              }
+                            }
+
+          svgLine.selectAll("rect")
+                   .data(nested_data)
+                   .enter()
+                   .append("rect")
+                   .attr("x", function(d) {
+                      return xScaleLine(parseTime(d.key));
+                   })
+                   .attr("y", function(d) {
+                      return hLine - yScaleLine(d.value) - padding;
+                   })
+                   .attr("width", "3px")
+                   .attr("height", function(d) {
+                      return yScaleLine(d.value);
+                   })
+                   .attr("fill", function(d) {
+                    return "rgb(0, 50, " + (d.value * 100) + ")";
+                   });
+
+                   //Create axes
+                   svgLine.append("g")
+                     .attr("class", "axis")
+                     .attr("transform", "translate(0," + (hLine - padding) + ")")
+                     .call(xAxis);
+
+                   svgLine.append("g")
+                     .attr("class", "axis")
+                     .attr("transform", "translate(" + (padding) + ", 0 )")
+                     .call(yAxis);
+
+                   svgLine.append("g")
+                    //.call(brush);
+                    .call(d3.brushX()
+                      .extent([[0, 0], [wLine, hLine]])
+                      .on("end", brushended));
+
+
+
+					});
+
+
+				});
+
+
+			//Create panning buttons
+			var createPanButtons = function() {
+
+				//Create the clickable groups
+
+				//North
+				var north = svg.append("g")
+					.attr("class", "pan")	//All share the 'pan' class
+					.attr("id", "north");	//The ID will tell us which direction to head
+
+				north.append("rect")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("width", w)
+					.attr("height", 30);
+
+				north.append("text")
+					.attr("x", w/2)
+					.attr("y", 20)
+					.html("&uarr;")
+
+				//South
+				var south = svg.append("g")
+					.attr("class", "pan")
+					.attr("id", "south");
+
+				south.append("rect")
+					.attr("x", 0)
+					.attr("y", h - 30)
+					.attr("width", w)
+					.attr("height", 30);
+
+				south.append("text")
+					.attr("x", w/2)
+					.attr("y", h - 10)
+					.html("&darr;")
+
+				//West
+				var west = svg.append("g")
+					.attr("class", "pan")
+					.attr("id", "west");
+
+				west.append("rect")
+					.attr("x", 0)
+					.attr("y", 30)
+					.attr("width", 30)
+					.attr("height", h - 60);
+
+				west.append("text")
+					.attr("x", 15)
+					.attr("y", h/2)
+					.html("&larr;")
+
+				//East
+				var east = svg.append("g")
+					.attr("class", "pan")
+					.attr("id", "east");
+
+				east.append("rect")
+					.attr("x", w - 30)
+					.attr("y", 30)
+					.attr("width", 30)
+					.attr("height", h - 60);
+
+				east.append("text")
+					.attr("x", w - 15)
+					.attr("y", h/2)
+					.html("&rarr;")
+
+				//Panning interaction
+
+				d3.selectAll(".pan")
+					.on("click", function() {
+
+						//Set how much to move on each click
+						var moveAmount = 50;
+
+						//Set x/y to zero for now
+						var x = 0;
+						var y = 0;
+
+						//Which way are we headed?
+						var direction = d3.select(this).attr("id");
+
+						//Modify the offset, depending on the direction
+						switch (direction) {
+							case "north":
+								y += moveAmount;  //Increase y offset
+								break;
+							case "south":
+								y -= moveAmount;  //Decrease y offset
+								break;
+							case "west":
+								x += moveAmount;  //Increase x offset
+								break;
+							case "east":
+								x -= moveAmount;  //Decrease x offset
+								break;
+							default:
+								break;
+						}
+
+						//This triggers a zoom event, translating by x, y
+						map.transition()
+							.call(zoom.translateBy, x, y);
+
+					});
+
+			};
+
+			//Create zoom buttons
+			var createZoomButtons = function() {
+
+				//Create the clickable groups
+
+				//Zoom in button
+				var zoomIn = svg.append("g")
+					.attr("class", "zoom")	//All share the 'zoom' class
+					.attr("id", "in")		//The ID will tell us which direction to head
+					.attr("transform", "translate(" + (w - 110) + "," + (h - 70) + ")");
+
+				zoomIn.append("rect")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("width", 30)
+					.attr("height", 30);
+
+				zoomIn.append("text")
+					.attr("x", 15)
+					.attr("y", 20)
+					.text("+");
+
+				//Zoom out button
+				var zoomOut = svg.append("g")
+					.attr("class", "zoom")
+					.attr("id", "out")
+					.attr("transform", "translate(" + (w - 70) + "," + (h - 70) + ")");
+
+				zoomOut.append("rect")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("width", 30)
+					.attr("height", 30);
+
+				zoomOut.append("text")
+					.attr("x", 15)
+					.attr("y", 20)
+					.html("&ndash;");
+
+				//Zooming interaction
+
+				d3.selectAll(".zoom")
+					.on("click", function() {
+
+						//Set how much to scale on each click
+						var scaleFactor;
+
+						//Which way are we headed?
+						var direction = d3.select(this).attr("id");
+
+						//Modify the k scale value, depending on the direction
+						switch (direction) {
+							case "in":
+								scaleFactor = 1.5;
+								break;
+							case "out":
+								scaleFactor = 0.75;
+								break;
+							default:
+								break;
+						}
+
+						//This triggers a zoom event, scaling by 'scaleFactor'
+						map.transition()
+							.call(zoom.scaleBy, scaleFactor);
+
+					});
+
+			};
+
+
+
+
+			//Bind 'Pacific Northwest' button behavior
+/*
+      d3.select("#pnw")
+				.on("click", function() {
+
+					map.transition()
+						.call(zoom.transform, d3.zoomIdentity
+							.translate(w/2, h/2)
+							.scale(0.9)
+							.translate(600, 300));
+
+			});
+
+			//Bind 'Reset' button behavior
+			d3.select("#reset")
+				.on("click", function() {
+
+					map.transition()
+						.call(zoom.transform, d3.zoomIdentity  //Same as the initial transform
+							.translate(w/2, h/2)
+							.scale(0.25)
+							.translate(-center[0], -center[1]));
+
+			});
+*/
+		</script>
+	</body>
+</html>
