@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
-		<title>D3: Map value labels</title>
-		<script type="text/javascript" src="../d3.js"></script>
+    <meta charset="utf-8">
+    <title>Assignment 2: Social Data Analysis and Visualization</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700' rel='stylesheet' type='text/css'>
+		<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 		<style type="text/css">
 
-			div {
-				margin-bottom: 10px;
-			}
 
 			.pan rect,
 			.zoom rect {
@@ -32,7 +31,29 @@
  			.pan:hover text,
 			.zoom:hover rect,
  			.zoom:hover text {
-				fill: blue;
+				fill: #31a354;
+			}
+
+      .reset rect {
+        fill: black;
+        opacity: 0.2;
+      }
+
+      .reset rect {
+				rx: 5;  /* Rounded corners */
+				ry: 5;
+			}
+
+      .reset text {
+				fill: black;
+        font-family: Helvetica, sans-serif;
+				font-size: 16px;
+				text-anchor: middle;
+			}
+
+      .reset:hover rect,
+ 			.reset:hover text {
+				fill: #31a354;
 			}
 
 			.label {
@@ -42,23 +63,42 @@
 				text-anchor: middle;
 			}
 
+      circle.hidden {
+        display: none;
+      }
+      .non_brushed {
+        fill: #a1d99b;
+      }
+      .brushed {
+        fill: #31a354;
+      }
+
 		</style>
 	</head>
 	<body>
+    <h1> Assignment 1: Social Data Analysis and Visualization </h1>
+    <center> <a href="#part1">PART 1</a> <a href="#part2">PART 2</a> <a href="#viz1">VIZ 1</a> <a href="#viz2">VIZ 2</a> </center>
+      <section id="part1" class="home">
+        <div class="sections">
+          <h2> Part 1: Question </h2>
+          <ul>
+            <li>  <b>Explain in your own words the point of the jitter plot.</b></li>
+          </ul>
+        </div>
+      </section>
 
-		<div>
-			<button id="reset">Reset</button>
-		</div>
-<br> </br>
-
+      <section id="part2" class="home">
+        <div class="sections">
+          <h2> Part 2: Visualization</h2>
+              <div id="viz"> </div>
 		<script type="text/javascript">
 
 			//Width and height
-			var w = 600;
+			var w = 800;
 			var h = 500;
       //Width and heigh for line chart
 
-      var wLine = 1000;
+      var wLine = 800;
       var hLine = 150;
 
       // define padding
@@ -66,7 +106,7 @@
 
       //Define map projection
 			var projection = d3.geoMercator()
-                   .center([-74.31, 40.855])
+                   .center([-74.22, 40.855])
                    .translate([w/2, h/2])
                    .scale([70000]);
 
@@ -78,21 +118,23 @@
 			//var color = d3.scaleQuantize()
 				//				.range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
 								//Colors taken from colorbrewer.js, included in the D3 download
-      var color = ["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"];
-			//Number formatting for population values
+      //var color = ["rgb(237,248,233)", "rgb(161,217,155)", "rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"];
+      var color = ['rgb(179,226,205)','rgb(253,205,172)','rgb(203,213,232)','rgb(244,202,228)','rgb(230,245,201)','rgb(255,242,174)','rgb(241,226,204)']
+
+      //Number formatting for population values
 			var formatAsThousands = d3.format(",");  //e.g. converts 123456 to "123,456"
 
 			//Number formatting for ag productivity values
 			var formatDecimals = d3.format(".3");  //e.g. converts 1.23456 to "1.23"
 
 			//Create SVG element
-			var svg = d3.select("body")
+			var svg = d3.select("#viz")
 						.append("svg")
 						.attr("width", w)
 						.attr("height", h);
 
       //Create SVG element for the line chart
-      var svgLine = d3.select("body")
+      var svgLine = d3.select("#viz")
             .append("svg")
             .attr("width", wLine)
             .attr("height", hLine);
@@ -187,10 +229,11 @@
 						.attr("y", function(d) {
 							 return path.centroid(d)[1];
 						})
-            .style("stroke", "gray")
+            .style("stroke", "white")
             .style("fill", "black")
-            .style("font-size", "16px")
-            .style("stroke-width", 0.50)
+            .style("font-size", "18px")
+            .style("text-shadow", "5px black")
+            .style("stroke-width", 0.15)
 
 						.text(function(d) {
 							 if (d.properties.BoroName) {
@@ -201,7 +244,7 @@
 					//Load in cities data
 					d3.csv("all_murder.csv", function(data) {
 
-						map.selectAll("circle")
+						var murderCircles = map.selectAll("circle")
 						   .data(data)
 						   .enter()
 						   .append("circle")
@@ -217,10 +260,11 @@
 						   .style("fill", "yellow")
 						   .style("stroke", "gray")
 						   .style("stroke-width", 0.25)
-						   .style("opacity", 0.75);
+						   .style("opacity", 0.75)
+               .classed("hidden", true);
 						   //.append("title")			//Simple tooltip
             console.log(data)
-						createPanButtons();
+						//createPanButtons();
 						createZoomButtons();
 
           // for converting dates to strings
@@ -230,10 +274,10 @@
           var parseTime = d3.timeParse("%m/%d/%Y");
 
           var nested_data = d3.nest()
-          .key(function(d) { return d.RPT_DT; })
-          .rollup(function(leaves) { return leaves.length; })
-          .entries(data);
-          console.log(nested_data)
+            .key(function(d) { return d.RPT_DT; })
+            .rollup(function(leaves) { return leaves.length; })
+            .entries(data);
+            console.log(nested_data)
 
           var xScaleLine = d3.scaleTime()
   							   .domain([
@@ -268,17 +312,34 @@
           function brushended() {
             if (!d3.event.sourceEvent) return; // Only transition after input.
             if (!d3.event.selection) return; // Ignore empty selections.
-            var d0 = d3.event.selection.map(x.invert),
-            d1 = d0.map(d3.timeDay.round);
+            var d0 = d3.event.selection,
+                d1 = d0.map(d3.timeDay.round);
+            console.log(d0,d1);
+            console.log(xScaleLine.invert(692.5765496639283));
+            // If empty when rounded, use floor & ceil instead.
+            if (d1[0] >= d1[1]) {
+                d1[0] = d3.timeDay.floor(d0[0]);
+                d1[1] = d3.timeDay.offset(d1[0]);
+            }
+          }
 
-                              // If empty when rounded, use floor & ceil instead.
-                              if (d1[0] >= d1[1]) {
-                                d1[0] = d3.timeDay.floor(d0[0]);
-                                d1[1] = d3.timeDay.offset(d1[0]);
+
+          function showCircle(dayForCircles) {
+            var test = xScaleLine.invert(692.5765496639283)
+            var circles =  d3.selectAll("circle").data()
+            console.log(circles)
+                    //            d.filter(function(d, test) { test
+
+                                //console.log(ditte)
+                                //if ( key == data.RPT_DT) {
+                                //.console.log('show circle')
+                                //.classed("hidden", true);
+
                               }
-                            }
 
-          svgLine.selectAll("rect")
+
+
+          var rects = svgLine.selectAll("rect")
                    .data(nested_data)
                    .enter()
                    .append("rect")
@@ -288,36 +349,65 @@
                    .attr("y", function(d) {
                       return hLine - yScaleLine(d.value) - padding;
                    })
-                   .attr("width", "3px")
+                   .attr("width", "2px")
                    .attr("height", function(d) {
                       return yScaleLine(d.value);
                    })
+                   .attr("class", "non_brushed")
                    .attr("fill", function(d) {
                     return "rgb(0, 50, " + (d.value * 100) + ")";
                    });
 
                    //Create axes
-                   svgLine.append("g")
+            svgLine.append("g")
                      .attr("class", "axis")
                      .attr("transform", "translate(0," + (hLine - padding) + ")")
                      .call(xAxis);
 
-                   svgLine.append("g")
+            svgLine.append("g")
                      .attr("class", "axis")
                      .attr("transform", "translate(" + (padding) + ", 0 )")
                      .call(yAxis);
 
-                   svgLine.append("g")
+            svgLine.append("g")
                     //.call(brush);
                     .call(d3.brushX()
-                      .extent([[0, 0], [wLine, hLine]])
+                      .extent([[padding, 0], [wLine-2*padding+2, hLine]])
+                      .on("brush", highlightBrushedLines)
                       .on("end", brushended));
 
+            function highlightBrushedLines() {
+                  if (d3.event.selection != null) {
+                    // revert circles to initial style
+                    rects.attr("class", "non_brushed");
+                    var brush_coords = d3.brushSelection(this);
+
+                    // style brushed bars
+                    rects.filter(function (){
+                       var cx = d3.select(this).attr("x");
+                         return isBrushed(brush_coords, cx);
+                    })
+                    .attr("class", "brushed");
+
+                    var cxBrushed = d3.selectAll(".brushed").attr("x");
+                     //console.log(cx)
+                    console.log(xScaleLine.invert(cxBrushed))
+
+                    var dayForCircles = xScaleLine.invert(cxBrushed);
 
 
+                    //console.log(dayForCircles)
+
+                    dayForCircles.call(showCircle());
+                                      }
+                                  }
 					});
+        function isBrushed(brush_coords, cx) {
 
-
+               var x0 = brush_coords[0],
+                   x1 = brush_coords[1];
+              return x0 <= cx && cx <= x1;
+        }
 				});
 
 
@@ -470,7 +560,22 @@
 					.attr("y", 20)
 					.html("&ndash;");
 
-				//Zooming interaction
+        var reset = svg.append("g")
+            .attr("class", "reset")
+            .attr("id","reset")
+            .attr("transform", "translate(" + (w - 170) + "," + (h - 70) + ")");
+
+        reset.append("rect")
+              .attr("x", 0)
+              .attr("y", 0)
+              .attr("width", 50)
+              .attr("height", 30);
+
+        reset.append("text")
+              .attr("x", 25)
+              .attr("y", 20)
+              .html("Reset");
+        //Zooming interaction
 
 				d3.selectAll(".zoom")
 					.on("click", function() {
@@ -498,6 +603,17 @@
 							.call(zoom.scaleBy, scaleFactor);
 
 					});
+          //Bind 'Reset' button behavior
+        d3.selectAll(".reset")
+            .on("click", function() {
+
+              map.transition()
+                .call(zoom.transform, d3.zoomIdentity  //Same as the initial transform
+                  .translate(w/2, h/2)
+                  .scale(8)
+                  .translate(-center[0], -center[1]));
+
+          });
 
 			};
 
@@ -516,19 +632,12 @@
 							.translate(600, 300));
 
 			});
-
-			//Bind 'Reset' button behavior
-			d3.select("#reset")
-				.on("click", function() {
-
-					map.transition()
-						.call(zoom.transform, d3.zoomIdentity  //Same as the initial transform
-							.translate(w/2, h/2)
-							.scale(0.25)
-							.translate(-center[0], -center[1]));
-
-			});
 */
-		</script>
+
+
+		    </script>
+      </div>
+    </section>
+  </center>
 	</body>
 </html>
