@@ -1,0 +1,126 @@
+<html lang="en">
+	<head>
+    <meta charset="utf-8">
+    <title>Final project: Social Data Analysis and Visualization</title>
+		<link rel="stylesheet" href="style.css">
+  </head>
+	<style>
+
+	</style>
+  <body>
+
+		<div class="section">
+			<h3>Final project: Social Data Analysis and Visualization</h3>
+			<h1> Explainer page </h1>
+			<center><a href="index.html">Data visualization</a>
+			<a href="explainer_page.html">Explainer page </a></center>
+			<a href="https://github.com/nannabarnkob/finalprojectSDAV/">Github Repository </a>
+    <h2>Motivation</h2>
+
+    <p>The visualization is based on data from<a href="https://portal.opendata.dk/dataset/samlede-socio-data-kbh/resource/37bc1c1a-1f57-4fcb-8b20-2a3b5b67c537">portal.opendata.dk</a>and was released by the municipality of Copenhagen. The original data set contains 2764 rows corresponding to observations distributed on 394 areas of Copenhagen.
+      For each area, we have seven data observations, one for each year ranging from 2008 to 2014. For 2014 a lot of information is missing and therefore it has been
+      chosen to exclude this year since it does not provide much additional information.
+      There are in total 102 attributes, including various socio-economic data, but only the ones explaining the age, income and educational distribution together with the
+      binding attributes area number (rodenr) and year are used in the visualization. We have chosen not to make the unused information available as it disrupts our narrative. <br>
+<br>
+			The data set was chosen because all members of the group have a strong relationship to Copenhagen. Therefore, we found it interesting to learn more about our city.
+      The data set was chosen since we found it interesting to see the difference in age distribution and educational level compared with the income level in
+      the different areas of Copenhagen. We wanted to see if there were any patterns in which areas are the most attractive to live in for people with a high income
+      and vice verca. Also we wanted to see if areas with for example a dorm located could be spotted in these attributes.
+
+    </p>
+
+    <h2>Basic stats</h2>
+
+    <p>We chose to pre-process the data such that the data needed were easily available and such that the browser load was minimized. For instance, we created aggregated data for all areas of Copenhagen as the sum of the different age groups and the different educational
+      levels for the years, which was not available in the original dataset.
+
+      During the project work, it became clear to us that some data points were missing. In some areas, we found that the data about age and/or
+      educational level were not available. <br>
+
+      During the exploratory data analysis we investigatedat the age distribution in areas like Rigshospitalet, where a dorm is located. Therefore we looked at the
+      age distribution, educational level and income level for this area which can be seen in following:
+    </p>
+<center>
+    <img src = "ageDistribution.png", width = "400", height = "245"> <img src = "educational.png", width = "400", height = "250">
+    <img src = "incomeLevel.png", width = "250", height = "255">
+</center>
+
+    <p>What can be seen in the age distribution is that there is more than double as many in the highest age group 18-29 than the nearest age group 30-39. When looking at
+      the educational level it is clear to see that most of the people in this area are students. This leads to the income level where only few has a high income and the majority has a low income, which is normal during education. <br>
+      This is an example of a pattern the visualization should show.
+    </p>
+
+    <h2>Genre</h2>
+
+    <h4>Visual structuring</h4>
+      <p>We have chosen to use a consistent visual platform where the overall design is always intact and only the content in different elements is changed.
+        By doing this it is easy to compare the age distribution and educational level from the previous depending on year and/or area. <br>
+        We have made a kind of time bar to show the progress of the income level during the available years (2008-2013). </p>
+    <h4>Highlighting</h4>
+      <p>In the map we have chosen that the user can make a close up to a wanted area to look closer to this area. <br>
+        Again to show the change in each plot we have used motion when updating the histogram and stacked area chart to really show for example the changes in the order.
+      </p>
+    <h4>Transition guidance</h4>
+      <p>As said before we have made motion in our plots to show difference. This is done by animated transition in the histogram and stacked area chart. </p>
+    <h4>Ordering</h4>
+      <p>Overall the ordering is random but intuitively the user should click the different years to see the development over the years and/or selecting the areas
+        to see this development for an area and therefore there is a touch of user directed ordering.
+      </p>
+    <h4>Interactivity</h4>
+      <p>If the user wants to see the values in each plot and additional information hover highlighting with details is made available. This helps telling the story
+        about the attributes and helps the user understand the plots. <br>
+        One navigation button has been created such that the user can go from viewing one area to see the full map with all areas. <br>
+        We have used stimulating default views with starting data for 2008 to get the viewer interested in exploring the other years and the other effects.
+				Apart from the tools mentioned in the fiugre, we use markers of interactivity on the map, as hovering an area toggles a stroke. Clicking the area freezes the stroke in a bolder state, indicating this area is selected. Hovering other areas still show the stroke, thus telling the viewer that a new area can be selected.
+				We also use details-on-demand; when the user hovers over an area on the map, a tool tip shows the percentage of people in the three income groups, but these details are elaborated as the area is clicked. This toggles the update of the histogram and area chart.
+      </p>
+    <h4>Messaging</h4>
+      <p>First of all we have used captions/headlines to make an overview of what is happening on the page and which elements can be seen. <br>
+        Annotations have been used in the tooltips to give additional information and explanation of the visualization. <br>
+        Since both a histogram with the age distrubtion and a stacked area chart with the educational level is shown multi-messaging is also used. These can individually
+        show something about an area but also together. <br>
+        A short introduction text have been made so the user is in no doubt what this is about and is also helping with making the user interested. </p>
+
+    <h2>Visualizations</h2>
+
+    <p>The map is essential to the visualization since this should show if any areas of Copenhagen is more likely to be inhabited by high, middle or low income people.
+			We have attempted to use semantically consistent colors on our map, meaning that the ordinal nature of income level is reflected in the brightness of the color fill for each area. The same principle is applied in the area chart for educational level.
+      The histogram and the stacked area chart is made to see if the reason for these patterns lies in the distribution of age in the area and the educational level
+      to see these patterns as was seen with the dorm in Rigshospitalet.
+      The histogram is a simple way to see how big a difference there is in the different agegroups. The stacked area chart shows both the development of the different
+      educational levels over the years and the size difference betweemn these.
+    </p>
+
+    <h2>Discussion</h2>
+
+		<p>
+      We are happy about the details in each plot showing the tooltips. We think this gives the user more information and makes the visualization more interesting.
+      Furthermore it went well with making the close up on the map such that all other elements still updates with the given area. <br><br>
+      We wanted to make an animation taking the user on a tour through the most extreme and interesting areas where it was clear that for example a dorm was located or where
+      many elderly people live. In this way we could really tell a story and show the interesting part of our data without having the user to discover it by themselves. <br>
+      Looking at the stacked area chart no big development is happening through the years. A change from area to area is clear to see and the changing area chart
+      show this. But we hoped a bigger change through the years also could be seen and show a pattern in students for example moving to some areas. But this is not the case.
+    </p>
+
+    <h2>Contributions</h2>
+
+			<h4>Thor</h4>
+			<p><i>The Manipulator of Perspective: "You only see what I want you to see"</i><br>
+			<b>Main responsibilities:</b> Zooming the map, data processing, map.</p>
+
+			<h4>Michelle</h4>
+			<p><i>The Artist of Visualization: "True beauty lies in the power of D3" </i><br>
+			<b>Main responsibilities: </b>Stacked area chart, histogram and updates to both histogram and stacked area chart, explainer page.</p>
+
+			<h4>Nanna</h4>
+			<p><i>The Map Bender: "Click on the map and your dreams will come true"</i><br>
+			<b>Main responsibilities: </b>Map, stacked area chart, page layout, button interactivity</p>
+
+</p>
+
+    </p>
+
+
+  </body>
+</html>

@@ -1,74 +1,1195 @@
-
-<!DOCTYPE html>
 <html lang="en">
-  <head>
+	<head>
     <meta charset="utf-8">
-    <script type="text/javascript" src="d3.js"></script>
-    <title> Social data analysis and visualization </title>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <script>
-        function myFunction() {
-        document.getElementById("demo").innerHTML = "Paragraph changed.";
-      }
-    </script>
-    <style type="text/css">
+    <title>Final project: Social Data Analysis and Visualization</title>
+    <script src="d3.js"></script>
+		<script src='https://api.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js'></script>
+		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="d3-tip.js"></script>
 
-  div.bar {
-    display: inline-block;
-    width: 20px;
-    height: 75px;	/* Gets overridden by D3-assigned height below */
-    margin-right: 2px;
-    background-color: teal;
-  }
 
-</style>
+		<link rel="stylesheet" href="style.css">
   </head>
+	<style>
+			.axis text {
+		  font: 10px sans-serif;
+		}
 
+			.area {
+				stroke: none;
+				-moz-transition: all 0.25s;
+				-o-transition: all 0.25s;
+				-webkit-transition: all 0.25s;
+				transition: all 0.25s;
+			}
+			.area:hover {
+				fill: rgb(255, 204, 0);
+			}
+
+			rect {
+				-moz-transition: all 0.25s;
+				-o-transition: all 0.25s;
+				-webkit-transition: all 0.25s;
+				transition: all 0.25s;
+			}
+
+			.histogram:hover {
+				stroke-width: 2px;
+				stroke: white;
+				fill: rgb(255, 204, 0);
+			}
+
+			.btn {
+		    border: none;
+		    background-color: inherit;
+		    padding: 14px 28px;
+		    font-size: 16px;
+		    cursor: pointer;
+		    display: inline-block;
+
+			}
+
+			.btn:hover {
+					background-color: rgb(255, 204, 0);
+			}
+
+			.areabutton {
+				border: none;
+				background-color: inherit;
+				padding: 14px 28px;
+				font-size: 16px;
+				cursor: pointer;
+				display: inline-block;
+				color: black;
+			}
+
+			.active {
+				background-color: rgb(255, 204, 0);
+			}
+/*
+			.activeArea {
+				background-color: rgb(20,20,20)
+			}
+*/
+			.active {
+				stroke-width: 3px;
+				stroke: rgb(255, 204, 0);
+			}
+			.areaActive {
+				fill: green;
+			}
+
+			.d3-tip {
+			  line-height: 1;
+			  font-weight: normal;
+			  padding: 12px;
+			  background: rgba(0, 0, 0, 0.8);
+			  color: #fff;
+			  border-radius: 2px;
+			}
+	}
+
+	</style>
   <body>
 
+		<div class="section">
+			<h3>Final project: Social Data Analysis and Visualization</h3>
+			<h1> Welcome to Copenhagen </h1>
+			<center><a href="index.html">Data visualization</a>
+			<a href="explainer_page.html">Explainer page </a>
+		<a href="https://github.com/nannabarnkob/finalprojectSDAV/">Github Repository </a>
+	</center>
+			<p> Here you can investigate the development differences in income level, educational level and age distribution in Copenhagen.
+				Move through time and space by selecting years on the buttons below and space by choosing an area of interest. <br> <br>
+				The legends for both educational and income data can be hovered for a description of each category. The educational data includes observations for citizens in the age group 16-64. The income groups are based on the brutto income of all citizens of at least 18 of age under regular taxation, before deductions such as interest rate expenditures and are based on the four quantiles of the total income distribution. </p>
+    <div class="viz"> </div>
+
     <script type="text/javascript">
 
-    var dataset = [ 5, 10, 15, 20, 25 ];
+    // width and height for map of visualization
+    var wMap = 1000;
+    var hMap = 500;
+		var wHist = 500;
+		var hHist = 400;
+		var wArea = 500;
+		var hArea = 400;
+		var wText = 1000;
+		var hText = 40;
+		var wMapLegend = 200;
+		var hMapLegend = hMap;
+		var wAreaLegend = 200;
+		var hAreaLegend = hArea;
 
-    d3.select("body").selectAll("p")
-      .data(dataset)
-      .enter()
-      .append("p")
-      .text("New paragraph!");
+		var centered;
+
+		// define padding
+    var paddingMap = 20;
+		var paddingHist = 30;
+		var paddingArea = 20;
+		var paddingText = 5;
+
+		// Define key function
+		var key = function(d){
+			return d.key;
+		};
+
+		function add(a, b) {
+    	return a + b;
+		}
+
+		// define tooltip for histogram
+		var tipHist = d3.tip()
+			.attr('class', 'd3-tip')
+			.offset([-10, 0])
+			.html(function(d) {
+				return "<span style='font-weight: bold'> Number of people: </span>" + d3.format(",")(d);
+			});
+
+		// define tooltip for map
+		var tipMap = d3.tip()
+			.attr('class', 'd3-tip')
+			.offset([-10, 0])
+			.html(function(d) {
+				return "<span style='font-weight: bold'> Area: </span> <span style='color:red'>" + d.properties.rodenavn + "</span><br> High income: " + d.properties.pct_hoj_indkomst + "%" + "<br> Middle income: " + d.properties.pct_middel_indkomst + "% <br> Low income: " + d.properties.pct_lav_indkomst + "%";
+			});
+
+		// define tooltip for area
+		var tipArea = d3.tip()
+			.attr('class', 'd3-tip')
+			.offset([-10, 0])
+			.html(function(d, i) {
+				return education_groups[i];
+			});
+
+		// define tooltip for area legend
+		var tipLegend = d3.tip()
+			.attr('class', 'd3-tip')
+			.offset([-10, 0])
+			.html(function(d, i) {
+				return "<span style='display:block; width:200px;'>" + education_explain[i] + "</span>";
+			});
+
+		// define tooltip for the map legend
+		var tipIncome = d3.tip()
+			.attr('class', 'd3-tip')
+			.offset([-10, 0])
+			.html(function(d, i) {
+				return "<span style='display:block; width:200px;'>" + income_groups_description[i] + "</span>";
+			});
+
+    	//Create SVG element for the map
+    	var svgMap = d3.select("div.viz")
+       		.append("svg")
+  			.attr("width", wMap + paddingMap)
+       		.attr("height", hMap + paddingMap);
+
+		// Create legend for the map
+		var mapLegend = d3.select("div.viz")
+			.append("svg")
+			.attr("width", wMapLegend)
+			.attr("height", hMapLegend)
+			.call(tipIncome);
+
+		// New line
+		d3.select("div.viz").append("br");
+
+		// Create div for buttons
+		d3.select("div.viz")
+			.append("div")
+			.attr("width", wMap)
+			.attr("height", hMap)
+			.attr("align","center")
+			.attr("id","buttons")
+			.attr("class", "buttons");
+
+		d3.select("div#buttons") // 2008
+			.append("button")
+			.attr("class", "btn active")
+			.attr("id", "2008")
+			.text("2008");
+
+		d3.select("div#buttons") // 2009
+			.append("button")
+			.attr("class", "btn")
+			.attr("id", "2009")
+			.text("2009");
+
+		d3.select("div#buttons") // 2010
+			.append("button")
+			.attr("class", "btn")
+			.attr("id", "2010")
+			.text("2010");
+
+		d3.select("div#buttons") // 2011
+			.append("button")
+			.attr("class", "btn")
+			.attr("id", "2011")
+			.text("2011");
+
+		d3.select("div#buttons") // 2012
+			.append("button")
+			.attr("class", "btn")
+			.attr("id", "2012")
+			.text("2012");
+
+		d3.select("div#buttons") // 2013
+			.append("button")
+			.attr("class", "btn")
+			.attr("id", "2013")
+			.text("2013");
+
+		d3.select("div#buttons") // All areas
+			.append("button")
+			.attr("class", "areabutton")
+			.attr("id", "AllAreas")
+			.text("View all areas");
+
+		// Create svg for the area and year text
+		var svgText = d3.select("div.viz")
+			.append("svg")
+			.attr("text-align","center")
+			.attr("width", wText)
+			.attr("height", hText);
+
+		// New line
+		d3.select("div.viz").append("br");
+
+		// Create svg for the histogram
+		var svgHist = d3.select("div.viz")
+			.append("svg")
+			.attr("width", wHist + paddingHist)
+			.attr("height", hHist + paddingHist)
+			.call(tipHist); // tiptool
+
+		// Create svg for stacked area chart
+		var svgArea = d3.select("div.viz")
+			.append("svg")
+			.attr("width", wArea + paddingArea)
+			.attr("height", hArea + paddingArea)
+			.call(tipArea); // tiptool
+
+		// Create legend for stacked area chart
+		var areaLegend = d3.select("div.viz")
+			.append("svg")
+			.attr("width", wAreaLegend)
+			.attr("height", hAreaLegend)
+			.call(tipLegend); // tiptool
+
+		//Create the map to which we append everything ...
+	  	var map = svgMap.append("g")
+	        .attr("id", "map")
+			.call(tipMap); // tiptool
+
+		//Create a new, invisible background rect to catch zoom events
+ 		map.append("rect")
+          	.attr("x", 0)
+    		.attr("y", 0)
+            .attr("width", wMap)
+    		.attr("height", hMap)
+            .attr("opacity", 0)
+			.on("click",clicked);
+
+		// Create map legends
+		//var map_colors = ["hsl(205, 0%, 63%)", '#74a9cf', '#034e7b', "#d0d1e6"]
+		var map_colors = ['rgb(5,112,176)', 'rgb(116,169,207)','rgb(189,201,225)','rgb(241,238,246)']
+		var income_groups = ["High income", "Middle income", "Low income", "Missing data"]
+		var area_map_colors = ['#f1eef6','#d0d1e6','#a6bddb','#74a9cf','#3690c0','#0570b0','#034e7b']
+
+		// Create map legend squares
+		mapLegend.selectAll("rect")
+			.data(map_colors)
+			.enter()
+			.append("rect")
+			.attr("x", 10)
+			.attr("y", function(d, i) {
+				return 100 + 60*i;
+			})
+			.attr("width", 100)
+			.attr("height", 20)
+			.attr("fill", function(d) {
+				return d;
+			})
+			.on("mouseover", tipIncome.show)
+			.on("mouseout", tipIncome.hide);
+
+		// Define text for map legend
+		mapLegend.selectAll("text")
+			.data(income_groups)
+			.enter()
+			.append("text")
+			.text(function(d) {
+				return d;
+			})
+			.attr("text-anchor", "middle")
+			.attr("x", 60)
+			.attr("y", function(d, i) {
+	 			return 95 + 60*i;
+	 		})
+			.attr("font-family", "sans-serif")
+			.attr("font-size", "15px")
+			.attr("fill", "black");
+
+			var income_groups_description = ["All incomes below the 1st quantile (first 25 percent) are grouped in the low income group.", "All incomes between the 1st and 3rd quantile (25%-75%) are grouped as middle income.", "Income level above the 3rd quantile (above 75%) is grouped as high.", "No information was available for income."];
+			// Legend for stacked area chart
+			var education_groups = ["High school", "Vocational education", "Short higher education", "Medium higher education", "Long higher education", "No education", "During education"]
+			// source:  https://ufm.dk/uddannelse/anerkendelse-og-dokumentation/dokumentation/termbase
+			 // (Graduate)
+			var education_explain = ["High school in Denmark is a 2-3 year education after primary school. It prepares the students to pursue a higher education afterwards." ,
+									"Vocational training is a common term for educations after primary school aiming at a particular profession. The length of the education can vary between 2 and 5.5 years.",
+									"Short higher education demands that the student has completed high school or, in some cases, a vocational education is enough. They last 2-3 years and entails in most cases a vocational academy degree.",
+									"Medium higher education demands that the student has completed high school or, in some cases, a vocational education is enough. They last 3-4.5 years.",
+									"Long higher education demands that the student has completed high school. In few cases a vocational education is enough. They last 5-6 year higher and is studied at universities.",
+									"One without an education. In this group is also immigrants that have education that cannot be placed in a Danish educational context.",
+									"One during education. Can be any of the above mention educations."];
+
+		// Define color bar for stacked area legend
+		areaLegend.selectAll("rect")
+		.data(education_groups)
+		.enter()
+		.append("rect")
+		.attr("x", 45)
+		.attr("y", function(d, i) {
+		 	return  15 + 60*i;
+		 })
+		 .attr("width", 20)
+		 .attr("height", 20)
+		 .attr("fill", function(d,i) {
+		 	return area_map_colors[i];
+		 })
+		 .text(function(d) {
+			 return d
+		})
+		.on("mouseover", tipLegend.show)
+		.on("mouseout", tipLegend.hide);
+
+		// Break lines in text when too long
+		var insertLinebreaks = function (d) {
+		    var el = d3.select(this);
+		    var words = d.split(' ');
+		    el.text('');
+			for (var i = 0; i < words.length; i++) {
+				var tspan = el.append('tspan').text(words[i]);
+				if (i > 0)
+					tspan.attr('x', 110).attr('dy', '15');
+				}
+		};
+
+		// Define text for stacked area chart
+		areaLegend.selectAll("text")
+		 	.data(education_groups)
+		 	.enter()
+		 	.append("text")
+		 	.html(function(d) {
+		 		return d;
+		 	})
+		 	.attr("text-anchor", "middle")
+			.attr("x", 110)
+		 	.attr("y", function(d, i) {
+		 		return 25 + 60*i;
+		 	})
+			.attr("width", 100)
+		 	.attr("font-family", "sans-serif")
+		 	.attr("font-size", "15px")
+		 	.attr("fill", "black")
+			.each(insertLinebreaks);
+
+		// define starting year:
+		var paragraphID = "2008" // starting year is actually defined in the creation of the map
+		var selected_name = "All"
+		var last_chosen_year = paragraphID
+		var all_areas_toggled = true;
+		d3.select("#AllAreas").classed("active", true)
+
+		// Get the container element
+		var btnContainer = document.getElementById("buttons");
+
+		// Get all buttons with class="btn" inside the container
+		var btns = btnContainer.getElementsByClassName("btn");
+
+		// Loop through the buttons and add the active class to the current/clicked button
+		for (var i = 0; i < btns.length; i++) {
+			btns[i].addEventListener("click", function() {
+				var current = document.getElementsByClassName("active");
+				// if map is active:
+				if (all_areas_toggled == true) {
+					current[0].className = current[0].className.replace("active", "");
+				}
+				// if map is not active:
+				else {
+					current[1].className = current[1].className.replace("active", "");
+				}
+				this.className += " active";
+			});
+		};
+
+		// Function for zooming in on chosen areas
+		function clicked(d,json) {
+			var projection = d3.geoMercator().fitSize([wMap, hMap], json);
+			var x,y,k;
+			if(d && centered !== d) {
+					var centroid = turf.centroid(d);
+
+				var NewCenter = projection([centroid.geometry.coordinates[0],centroid.geometry.coordinates[1]])
+				x = NewCenter[0]
+				y = NewCenter[1]
+				k = 3;
+				centered = d;
+			}
+			// zoom out
+			else {
+				x = (wMap) / 2;
+				y = hMap / 2;
+				k = 1;
+				centered = null;
+				all_areas_toggled = true;
+				d3.select("#AllAreas").classed("active", true)
+			}
+
+			// Update map to new center coordinates
+			map.selectAll("path")
+				.classed("active", centered && function(d) {
+					return d === centered;
+				})
+				.transition()
+			 	.duration(700)
+			 	.attr("transform", "translate(" + (wMap) / 2 + "," + hMap / 2 + ")scale(" + k + ")translate(" + -x + "," + -y  + ")");
+		 		};
+
+				// Prepare empty arrays for data
+		 		 var temp2008 = 0
+		 		 var temp2009 = 0
+		 		 var temp2010 = 0
+		 		 var temp2011 = 0
+		 		 var temp2012 = 0
+		 		 var temp2013 = 0
+		 		 var temp2014 = 0
+
+				 // Load geoJSON file
+		 		 d3.json("socio_data_kbh.geojson", function(json) {
+
+				// Sort json for error handling
+				function propSort(props) {
+				 	 if (!props instanceof Array) props = props.split(",");
+				 	 return function sort(a, b) {
+				 		 var p;
+				 		 a = a.properties;
+				 		 b = b.properties;
+				 		 for (var i = 0; i < props.length; i++) {
+				 			 p = props;
+				 			 if (typeof a[p] === "undefined") return -1;
+				 			 if (a[p] < b[p]){
+				 				 return -1;}
+				 			 if (a[p] > b[p]){
+				 				 return 1;}
+				 		 }
+				 		 return 0;
+				 	 };
+				  }
+					json.features.sort(propSort("rode_nr"))
+
+					// Copy arrays
+		 			 var year2008 = JSON.parse(JSON.stringify(json))
+		 			 var year2009 = JSON.parse(JSON.stringify(json))
+		 			 var year2010 = JSON.parse(JSON.stringify(json))
+		 			 var year2011 = JSON.parse(JSON.stringify(json))
+		 			 var year2012 = JSON.parse(JSON.stringify(json))
+		 			 var year2013 = JSON.parse(JSON.stringify(json))
+		 			 var year2014 = JSON.parse(JSON.stringify(json))
+
+					 // Initialize index variable
+		 			 var temp2008 = 0
+		 			 var temp2009 = 0
+		 			 var temp2010 = 0
+		 			 var temp2011 = 0
+		 			 var temp2012 = 0
+		 			 var temp2013 = 0
+		 			 var temp2014 = 0
+
+					 // Group data in arrays based on years
+		 			 var L = json.features.length
+		 			 for(k = 0; k < L; k++) {
+		 				 var d = json.features[k]
+		 				 if (+d.properties.aar != 2008) {
+		 					 year2008.features.splice(temp2008,1)
+		 					 temp2008--
+		 				 }
+		 				 if (+d.properties.aar != 2009) {
+		 					 year2009.features.splice(temp2009,1)
+		 					 temp2009--
+		 				 }
+		 				 if (+d.properties.aar != 2010) {
+		 					 year2010.features.splice(temp2010,1)
+		 					 temp2010--
+		 				 }
+		 				 if (+d.properties.aar != 2011) {
+		 					 year2011.features.splice(temp2011,1)
+		 					 temp2011--
+		 				 }
+		 				 if (+d.properties.aar != 2012) {
+		 					 year2012.features.splice(temp2012,1)
+		 					 temp2012--
+		 				 }
+		 				 if (+d.properties.aar != 2013) {
+		 					 year2013.features.splice(temp2013,1)
+		 					 temp2013--
+		 				 }
+		 				 if (+d.properties.aar != 2014) {
+		 					 year2014.features.splice(temp2014,1)
+		 					 temp2014--
+		 				 }
+		 				 temp2008++
+		 				 temp2009++
+		 				 temp2010++
+		 				 temp2011++
+		 				 temp2012++
+		 				 temp2013++
+		 				 temp2014++
+		 			 }
+					 // Define placeholder values
+					 var wrong_places = 0
+					 for(k = 0; k < year2012.features.length; k++){
+						 if (k != (year2012.features[k].properties.rode_nr -1)) {
+							 wrong_places += 1
+							 year2012.features.splice(k,0,year2011.features[k])
+						 }
+					 }
+
+		 			var selected_year_data;
+					// Define new projections
+		 			var projection = d3.geoMercator().fitSize([wMap, hMap], year2008);
+		 			var path = d3.geoPath().projection(projection);
+
+			// array for row with one year observation for creating over all histogram
+			var year_age_observation = [];
+			// draw the map using the json arrays
+			var choropleth = map.append("g")
+				.attr("id","choropleth")
+				.selectAll("path")
+				.data(year2008.features)
+				.enter()
+				.append("path")
+				.attr("d", path)
+				.attr("id",function(d) {
+					return d.properties.rode_nr
+				})
+				.attr("text",function(d) {
+					return d.properties.rodenavn
+				})
+				.attr("stroke-width", "0.5")
+				.attr("stroke", "white")
+				.attr("fill", function(d, i) {
+					// make array of three income values
+					var obj = [d.properties.pct_hoj_indkomst, d.properties.pct_middel_indkomst, d.properties.pct_lav_indkomst]
+					// check for missing data
+					if (obj.reduce(add, 0) == 0) {
+						return map_colors[3]  // fill path with grey
+					}
+					else if(obj.reduce(add, 0) != 0) {
+						// find index of max value
+						var maxKey = Object.keys(obj).reduce(function(a, b){ return obj[a] > obj[b] ? a : b });
+						// if most prevalent area is high income:
+						if(maxKey == 0) {
+							return map_colors[0] // green
+						}
+						// if most prevalent is middle income:
+						if(maxKey == 1) {
+							return map_colors[1] // orange
+						}
+						// if most prevalent area is low income:
+						if(maxKey == 2) {
+							return map_colors[2]// red
+						}
+					}
+				})
+				.on("click",clicked);
+
+				// functions for handling what happens when you hover on the map
+				function mouseOverHandler(d, i) {
+					d3.select(this).attr("stroke-width", "1.5")
+				}
+				function mouseOutHandler(d, i) {
+					d3.select(this).attr("stroke-width", "0.5")
+				}
+
+			// Create area and year text
+			svgText.append("text")
+        .attr("transform", "translate(" + (wText/2) + "," + hText/2 + ")")
+				.style("text-anchor", "middle")
+				.text("Area: " + selected_name + ", year " + paragraphID)
+				.attr("font-weight", "bold")
+				.attr("class", "header")
+				.attr("id", "headerHist")
+				.attr("font-size","25px");
+
+			// Read sorted data with only relevant attributes
+			d3.csv("Sorted_data.csv",function(data) {
+				var sorted_data = data;
+
+			// Load the aggregated age data
+			d3.csv("Aggregated_data.csv", function(data) {
+				age_data = data;
+				year_observation = []
+				age_data.forEach(function(d) {
+						if (+d.aar == Number(paragraphID)) {
+							year_observation.push(+d["alder_antal_0_5"])
+							year_observation.push(+d["alder_antal_6_17"])
+							year_observation.push(+d["alder_antal_18_29"])
+							year_observation.push(+d["alder_antal_30_39"])
+							year_observation.push(+d["alder_antal_40_49"])
+							year_observation.push(+d["alder_antal_50_64"])
+							year_observation.push(+d["alder_antal_over_65"])
+						};
+					});
+
+			// Define xscale for the histogram
+			var xScaleHist = d3.scaleBand()
+				.domain(d3.range(year_observation.length))
+				.range([paddingHist * 2 + 5, wHist])
+				.paddingInner(0.05);
+			// Define yscale for the histogram
+			var yScaleHist = d3.scaleLinear()
+				.domain([0, d3.max(d3.values(year_observation))])
+				.range([hHist, paddingHist + paddingHist/2]);
+			// Create labels for the x axis
+			var xLabelHist = d3.scaleBand()
+				.domain(["Age 0-5","Age 6-17","Age 18-29","Age 30-39","Age 40-49","Age 50-64", "Above 64"])
+				.range([paddingHist * 2 , wHist])
+				.paddingInner(0.05);
+			// Define x axis
+			var xAxisHist = d3.axisBottom()
+				.scale(xLabelHist);
+
+			// Define y axis
+		  	var yAxisHist = d3.axisLeft()
+				.scale(yScaleHist);
+
+			// Create bars
+			svgHist.append("g")
+							.selectAll("rect")
+							.data(year_observation)
+							.enter()
+							.append("rect")
+							.attr("class", "histogram")
+							.attr("x", function(d, i) {
+							return xScaleHist(i);
+							})
+							.attr("y", function(d) {
+							return yScaleHist(d) - paddingHist/2;
+							})
+							.attr("width", xScaleHist.bandwidth())
+							.attr("height", function(d, i) {
+							return hHist - yScaleHist(d);
+							})
+							.attr("fill", function(d) {
+								return "rgb(70," + parseInt(yScaleHist(d)*0.5+50) + "," + parseInt(yScaleHist(d)*0.5+100)+")";
+						})
+							.on('mouseover', tipHist.show)
+							.on('mouseout', tipHist.hide);
+
+			// Make x axis
+			svgHist.append("g")
+						.attr("class","x axis")
+						.attr("transform","translate(0," + (hHist - paddingHist/2) + ")")
+						.call(xAxisHist);
+
+			// Create y axis
+			svgHist.append("g")
+						.attr("class","y axis")
+						.attr("transform","translate(" + paddingHist * 2 + "," + -paddingHist/2 + ")")
+						.call(yAxisHist);
+
+				// Create x axis label
+				svgHist.append("text")
+                      .attr("transform", "translate(" + (wHist/2 + paddingHist) + " , " + (hHist + paddingHist) + " )")
+                      .style("text-anchor", "middle")
+                      .text("Age groups")
+                      .attr("fill", "black")
+                      .attr("font-size","16px");
+
+				// Create y axis label
+				svgHist.append("text")
+					.attr("transform", "rotate(-90)")
+					.attr("x", -hHist/2)
+					.attr("y", 0)
+					.style("text-anchor", "middle")
+					.text("Number of people")
+					.attr("fill", "black")
+					.attr("font-size","16px");
+
+				// Create header
+				svgHist.append("text")
+					.attr("transform", "translate(" + (wHist/2 + paddingHist) + "," + paddingHist/2 + ")")
+					.style("text-anchor", "middle")
+					.text("Age distribution")
+					.attr("font-weight", "bold")
+					.attr("class", "header")
+					.attr("id", "headerHist")
+					.attr("font-size","25px");
+
+				// Create stacked area chart
+				// stack method:
+			var stack = d3.stack()
+				.order(d3.stackOrderDescending);	// flipped stack order
+
+				// load in aggregated education data for "all" option
+			d3.csv("Aggregated_data_udd.csv", function(data) {
+				education_data = data;
+				var keys_aggregated_data = education_data.columns;
+				// remove the first and last column
+				keys_aggregated_data.shift();
+				keys_aggregated_data.pop();
+				stack.keys(keys_aggregated_data);
+				var keys = keys_aggregated_data;
+				var series_aggregated_data = stack(education_data); // Saved for later use
+				var series = series_aggregated_data;
+
+				// Create x scale
+				var xScaleArea = d3.scaleLinear()
+				.domain([2008, d3.max(education_data, function(d) {
+					return +d.aar;
+				})])
+				.range([paddingArea, wArea-paddingArea*2]);
+
+				// Create y scale
+				var yScaleArea = d3.scaleLinear()
+					.domain([0,d3.max(education_data, function(d) {
+						var sum = 0;
+						for (var i = 0; i<keys.length; i++) {
+							sum += +d[keys[i]];
+						};
+						return sum;
+					})])
+					.range([hArea - paddingArea, paddingArea])
+					.nice();
+
+				// Create x axis
+				var xAxisArea = d3.axisBottom()
+					.scale(xScaleArea)
+					.ticks(7)
+					.tickFormat(d3.format(".4"));
+
+				// Create y axis
+				var yAxisArea = d3.axisRight()
+					.scale(yScaleArea)
+					.ticks(5);
+
+				// Create area
+				var area = d3.area()
+					.x(function(d) {
+						return xScaleArea(d.data.aar);
+					})
+					.y0(function(d) {
+						return yScaleArea(d[0]);
+					})
+					.y1(function(d) {
+						return yScaleArea(d[1]);
+					});
+
+				// Create stacked area chart
+				svgArea.selectAll("path")
+					.data(series)
+					.enter()
+					.append("path")
+					.attr("class","area")
+					.attr("d", area)
+					.attr("fill",function(d,i) {
+						return area_map_colors[i];
+					})
+					.on('mouseover', tipArea.show) // tooltip
+					.on('mouseout', tipArea.hide);
+
+					// Define x axis
+					svgArea.append("g")
+						.attr("class", "x axis")
+						.attr("transform", "translate(0," + (hArea - paddingArea) + ")")
+						.call(xAxisArea);
+
+					// Define y axis
+					svgArea.append("g")
+						.attr("class", "y axis")
+						.attr("transform", "translate(" + (wArea - paddingArea * 2) + ", 0)")
+						.call(yAxisArea);
+
+					// Create x axis label
+					svgArea.append("text")
+                      .attr("transform", "translate(" + (wArea/2 - paddingArea/2) + " , " + (hArea + paddingArea) + " )")
+                      .style("text-anchor", "middle")
+                      .text("Year")
+                      .attr("fill", "black")
+                      .attr("font-size","16px");
+
+					// Create y axis label
+					svgArea.append("text")
+						.attr("transform", "rotate(-90)")
+						.attr("x", -hArea/2)
+						.attr("y", wArea + paddingArea)
+						.style("text-anchor", "middle")
+						.text("Number of people")
+						.attr("fill", "black")
+						.attr("font-size","16px");
+
+					// Create header
+					svgArea.append("text")
+                        .attr("transform", "translate(" + (wArea/2 + paddingArea) + "," + paddingArea/2 + ")")
+                        .style("text-anchor", "middle")
+                        .text("Educational level")
+                        .attr("font-weight", "bold")
+                        .attr("class", "header")
+						.attr("id", "headerHist")
+                        .attr("font-size","25px");
+					// area chart done
+
+			// New selection on map related to updating histogram
+			map.selectAll("path")
+				.on("mouseover", function(d) {
+					mouseOverHandler.call(this, d);
+					tipMap.show.call(this,d);
+				})
+				.on("mouseout", function(d) {
+					mouseOutHandler.call(this,d);
+					tipMap.hide.call(this,d);
+				})
+				.on("click", function(d) {
+					all_areas_toggled = false
+					d3.select("#AllAreas").classed("active", false) // color button based on false status
+
+					// get selected area name and number:
+					var selected_rodenr = d3.select(this).attr("id");
+					var selected_name = d3.select(this).attr("text");
+
+					// update title according to selected area:
+					svgText.select(".header").text("Area: " + selected_name + ", year " + paragraphID)
+
+					// collect data for histogram
+					var age_distribution_data = [d.properties.alder_antal_0_5, d.properties.alder_antal_6_17, d.properties.alder_antal_18_29, d.properties.alder_antal_30_39, d.properties.alder_antal_40_49,d.properties.alder_antal_50_64, d.properties.alder_antal_over_65]
+
+					update_histogram(age_distribution_data);
+					update_areachart(selected_rodenr)
+					// add zoom / close-up behavior
+					clicked(d,json)
+				})
+
+		// When clicked update with new data sets
+		d3.selectAll("button")
+ 		.on("click", function() {
+ 			var getParagraphID = d3.select(this).attr("id");
+
+			// if selected option is all areas, update using the aggregated data and the previously chosen year
+ 			if (getParagraphID == "AllAreas") {
+				all_areas_toggled = true;
+				//console.log("Viewing data for all areas, updating using",last_chosen_year)
+
+				if (all_areas_toggled) {
+						d3.select("#AllAreas").classed("active", true)
+
+						// zoom out:
+						var x,y,k;
+						x = (wMap) / 2;
+						y = hMap / 2;
+						k = 1;
+						centered = null;
+						// update map
+						map.selectAll("path")
+						 .classed("active", centered && function(d) { return d === centered; })
+						 .transition()
+						 .duration(700)
+						 .attr("transform", "translate(" + (wMap) / 2 + "," + hMap / 2 + ")scale(" + k + ")translate(" + -x + "," + -y  + ")");
+
+						 // update area chart to show all areas again
+						 // Get data
+						 keys = keys_aggregated_data;
+						 series = series_aggregated_data;
+
+						 		// Redefine y axis domain
+						 		yScaleArea = d3.scaleLinear()
+						 				.domain([0,d3.max(education_data, function(d) {
+						 					var sum = 0;
+						 					for (var i = 0; i < keys.length; i++) {
+						 						sum += +d[keys[i]];
+						 					};
+						 					return sum;
+						 				})])
+						 				.range([hArea - paddingArea, paddingArea])
+						 				.nice();
+
+						 		yAxisArea = d3.axisRight()
+						 					.scale(yScaleArea)
+						 					.ticks(10);
+
+						 		area = d3.area()
+						 					.x(function(d) {
+						 						return xScaleArea(d.data.aar);
+						 					})
+						 					.y0(function(d) {
+						 						return yScaleArea(d[0]);
+						 					})
+						 					.y1(function(d) {
+						 						return yScaleArea(d[1]);
+						 					});
+
+						 		// Update paths and y axis
+						 		svgArea.selectAll("path")
+						 			.data(series)
+						 			.transition()
+						 			.duration(1300)
+						 			.attr("d", area)
+						 			.delay(function(d, i) {
+						 				return i / series.length;
+						 			})
+						 			.ease(d3.easeLinear)
+						 			.attr("fill",function(d,i) {
+						 				return area_map_colors[i];
+						 			});
+
+									// Update axis
+						 			svgArea.select(".y.axis")
+						 				.transition()
+						 				.duration(1300)
+						 				.call(yAxisArea);
+					 }
+				else {
+					d3.select("#AllAreas").classed("active", false)
+				}
+
+				// update using aggregated year data for age distribution
+ 				paragraphID = last_chosen_year
+ 				selected_name = "All"
+				year_age_observation = [];
+
+ 				age_data.forEach(function(d) {
+ 						if (+d.aar == Number(paragraphID)) {
+ 							year_age_observation.push(+d["alder_antal_0_5"])
+ 							year_age_observation.push(+d["alder_antal_6_17"])
+ 							year_age_observation.push(+d["alder_antal_18_29"])
+ 							year_age_observation.push(+d["alder_antal_30_39"])
+ 							year_age_observation.push(+d["alder_antal_40_49"])
+ 							year_age_observation.push(+d["alder_antal_50_64"])
+ 							year_age_observation.push(+d["alder_antal_over_65"])
+ 						};
+ 					});
+					svgText.select(".header").text("Area: " + selected_name + ", Year: " + paragraphID)
+ 					update_histogram(year_age_observation);
+
+ 			}
+			// Case for paragraphID is a year
+ 			else {
+ 				paragraphID = getParagraphID
+ 				last_chosen_year = paragraphID
+
+				// update the map based on the chosen year
+				update_map(paragraphID)
+
+				// Two cases: either update the histogram based on the active area or all aggregated data
+				if (all_areas_toggled) {
+					d3.select("#AllAreas").classed("active", true)
+					selected_name = "All"
+					year_age_observation = [];
+
+	 				age_data.forEach(function(d) {
+	 						if (+d.aar == Number(paragraphID)) {
+	 							year_age_observation.push(+d["alder_antal_0_5"])
+	 							year_age_observation.push(+d["alder_antal_6_17"])
+	 							year_age_observation.push(+d["alder_antal_18_29"])
+	 							year_age_observation.push(+d["alder_antal_30_39"])
+	 							year_age_observation.push(+d["alder_antal_40_49"])
+	 							year_age_observation.push(+d["alder_antal_50_64"])
+	 							year_age_observation.push(+d["alder_antal_over_65"])
+	 						};
+	 					});
+						// update header and histogram
+						svgText.select(".header").text("Area: " + selected_name + ", year " + paragraphID)
+	 					update_histogram(year_age_observation);
+				}
+
+				else {
+					// select data for selected area based on the class 'active' (also determines yellow color)
+					var age_data_selected_area = d3.selectAll(".active").data()
+					var age_selection = age_data_selected_area[0].properties
+					// find name for updating header
+					selected_name = age_selection.rodenavn
+					var age_distribution_area = [age_selection.alder_antal_0_5, age_selection.alder_antal_6_17, age_selection.alder_antal_18_29, age_selection.alder_antal_30_39, age_selection.alder_antal_40_49,age_selection.alder_antal_50_64, age_selection.alder_antal_over_65]
+
+					// update header and histogram
+					svgText.select(".header").text("Area: " + selected_name + ", year " + paragraphID)
+					update_histogram(age_distribution_area)
+				}
+ 			}
+ 			});
+
+
+ 			// Function for updating the map
+			function update_map(paragraphID) {
+				// Select data set based on chosen paragraph ID
+				if (paragraphID == "2008") {
+					selected_year_data = year2008
+				}
+				else if (paragraphID == "2009") {
+					selected_year_data = year2009
+				}
+				else if (paragraphID == "2010") {
+					selected_year_data = year2010
+				}
+				else if (paragraphID == "2011") {
+					selected_year_data = year2011
+				}
+				else if (paragraphID == "2012") {
+					selected_year_data = year2012
+				}
+				else if (paragraphID == "2013") {
+					selected_year_data = year2013
+				}
+				// update projection
+				var projection = d3.geoMercator().fitSize([wMap, hMap], selected_year_data);
+				var path = d3.geoPath().projection(projection);
+
+				// Update map colors
+				map.selectAll("path")
+					.data(selected_year_data.features)
+					.attr("fill", function(d, i) {
+
+						// make array of three income values
+						var obj = [d.properties.pct_hoj_indkomst, d.properties.pct_middel_indkomst, d.properties.pct_lav_indkomst]
+						// check for missing data
+						if (obj.reduce(add, 0) == 0) {
+							return map_colors[3]  // fill path with grey
+						}
+						else if(obj.reduce(add, 0) != 0) {
+							// find index of max value
+							var maxKey = Object.keys(obj).reduce(function(a, b){ return obj[a] > obj[b] ? a : b });
+							// if most prevalent area is high income:
+							if(maxKey == 0) {
+								return map_colors[0] // green
+							}
+							// if most prevalent is middle income:
+							if(maxKey == 1) {
+								return map_colors[1] // orange
+							}
+							// if most prevalent area is low income:
+							if(maxKey == 2) {
+								return map_colors[2]// red
+							}
+						}
+					})
+				}
+
+	// Function for updating the stacked area chart
+	function update_areachart(selected_rodenr) {
+
+		// 1. Update data set based on rode_nr
+		var education_data_rodenr = []
+
+		sorted_data.forEach(d => {
+			if (+d.rode_nr == selected_rodenr) {
+				education_data_rodenr.push(d);
+			}
+		})
+
+		var education_data_subset = education_data_rodenr.map(function(d,i) {
+		  return {
+		    aar: d.aar,
+				antal_gymnasial_udd: d.antal_gymnasial_udd,
+				antal_erh_faglig_udd: d.antal_erh_faglig_udd,
+				antal_kort_viderg_udd: d.antal_kort_viderg_udd,
+				antal_mellemlang_viderg_udd: d.antal_mellemlang_viderg_udd,
+		    antal_lang_viderg_udd: d.antal_lang_viderg_udd,
+				antal_ingen_udd: d.antal_ingen_udd,
+				antal_under_udd: d.antal_under_udd
+		  };
+		});
+
+		var keys = Object.getOwnPropertyNames(education_data_subset[0]);
+		// remove the first and last column
+		keys.shift();
+		stack.keys(keys);
+
+		var series = stack(education_data_subset);
+
+		// 2. Redefine y axis domain
+		yScaleArea = d3.scaleLinear()
+				.domain([0,d3.max(education_data_subset, function(d) {
+					var sum = 0;
+					for (var i = 0; i < keys.length; i++) {
+						sum += +d[keys[i]];
+					};
+					return sum;
+				})])
+				.range([hArea - paddingArea, paddingArea])
+				.nice();
+
+		yAxisArea = d3.axisRight()
+					.scale(yScaleArea)
+					.ticks(10);
+
+		area = d3.area()
+					.x(function(d) {
+						return xScaleArea(d.data.aar);
+					})
+					.y0(function(d) {
+						return yScaleArea(d[0]);
+					})
+					.y1(function(d) {
+						return yScaleArea(d[1]);
+					});
+
+		// 3. Update paths and y axis
+		svgArea.selectAll("path")
+			.data(series)
+			.transition()
+			.duration(700)
+			.attr("d", area)
+			.delay(function(d, i) {
+				return i / series.length;
+			})
+			.ease(d3.easeLinear)
+			.attr("fill",function(d,i) {
+				return  area_map_colors[i];
+			});
+
+
+			svgArea.select(".y.axis")
+				.transition()
+				.duration(1000)
+				.call(yAxisArea);
+	}
+
+
+	// Function for updating the histogram using a simple array for input
+	function update_histogram(age_data_array) {
+
+		// update the y scale
+		yScaleHist.domain([0, d3.max(d3.values(age_data_array))]);
+
+		// Update bars
+		svgHist.selectAll("rect")
+				.data(age_data_array)
+				.transition()
+				.duration(700)
+				.ease(d3.easeLinear)
+				.attr("x", function(d, i) {
+					return xScaleHist(i);
+				})
+				.attr("y", function(d) {
+					return yScaleHist(d) - paddingHist/2;
+				})
+				.attr("width", xScaleHist.bandwidth())
+				.attr("height", function(d, i) {
+					return hHist - yScaleHist(d);
+				})
+				.attr("fill", function(d) {
+						return "rgb(54," + parseInt(yScaleHist(d)*0.5+50) + "," + parseInt(yScaleHist(d)*0.5+100)+")";
+			});
+
+		// Update y axis
+		svgHist.select(".y.axis")
+					.transition()
+					.duration(1000)
+					.call(yAxisHist);
+	}
+	});
+		});
+	});
+});
 
     </script>
-    <h1>A Web Page</h1>
-    <p id="demo">A Paragraph</p>
-    <button type="button" onclick="myFunction()">Try it</button>
-    <svg width="10" height="100">
-    <circle cx="25" cy="25" r="22" class="pumpkin"/>
-    </svg>
-    <a href="project-folder/project_file1.html">Click here for another page </a> <br>
-    <a href="server.html">Click here for the server  page </a>
-    <a href="F02/03_csv_loading_example.html">Click here for loading data </a>
-    <script type="text/javascript">
-      var dataset = [];  						 //Initialize empty array
-      var dataset_double = [];
-      for (var i = 0; i < 25; i++) {			 //Loop 25 times
-      var newNumber = Math.floor(Math.random() * 30);  //New random integer (0-29)
-      dataset.push(newNumber);			 // Add new number to array
-      var newNumber = Math.
-      }
-      d3.select("body").selectAll("div")
-      .data(dataset)
-      .enter()
-      .append("div")
-      .attr("class", "bar")
-      .style("height", function(d) {
-      var barHeight = d * 5;
-      return barHeight + "px";
-      });
-
-    </script>
-
-    <br>
-    <a href="F02/presidents.html">Week 2</a> <br>
-    <a href="F03/index.html">Week 3</a>
   </body>
 </html>
